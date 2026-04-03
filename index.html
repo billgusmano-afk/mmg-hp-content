@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HP Content Engine — The Motivated Mind Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* MMG Brand Colors */
+  --pink: #FF97A9;
+  --pink-deep: #F4607A;
+  --pink-light: #FFE0E6;
+  --pink-pale: #FFF5F7;
+  --black: #1D1D1B;
+  --warm-gray: #F8F4F1;
+  --mid-gray: #EDE8E4;
+  --border: rgba(29,29,27,.1);
+  --border-strong: rgba(29,29,27,.2);
+  --text: #1D1D1B;
+  --text-mid: rgba(29,29,27,.55);
+  --text-soft: rgba(29,29,27,.38);
+  /* Secondary palette */
+  --lavender: #8A5FBE;
+  --green: #34A853;
+  --green-light: #B4EBCA;
+  --yellow: #F5E663;
+  --blue-light: #BCF4F5;
+  --slate: #8075FF;
+  /* HP brand (used sparingly for HP content) */
+  --hp: #0096D6;
+  --hp-light: #E6F4FB;
+  /* Status */
+  --s-approve: #34A853;
+  --s-reject: #E53935;
+  --s-flag: var(--pink-deep);
+  --s-warn: #F9A825;
+  --s-pending: #8075FF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Open Sans', sans-serif; background: var(--warm-gray); color: var(--text); min-height: 100vh; font-size: 13px; }
+h1,h2,h3,h4 { font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; }
+a { color: var(--pink-deep); text-decoration: none; }
+
+/* ── LOGO SVG ── */
+.mmg-logo { display: inline-flex; align-items: center; gap: 10px; }
+.mmg-m { width: 34px; height: 30px; }
+.mmg-wordmark { font-family: 'Source Serif 4', serif; font-size: 13px; font-weight: 600; color: var(--black); line-height: 1.25; }
+.mmg-wordmark span { display: block; }
+
+/* ── LOGIN ── */
+#ls { position: fixed; inset: 0; background: var(--warm-gray); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.lb { background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 44px 48px; width: 440px; box-shadow: 0 8px 40px rgba(29,29,27,.08); }
+.l-logo { margin-bottom: 28px; }
+.l-title { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 600; color: var(--black); margin-bottom: 6px; }
+.l-sub { font-size: 12px; color: var(--text-mid); margin-bottom: 28px; line-height: 1.6; }
+.l-tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 24px; gap: 2px; }
+.l-tab { flex: 1; text-align: center; padding: 9px; font-size: 12px; font-weight: 600; color: var(--text-mid); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: all .15s; font-family: 'Open Sans', sans-serif; }
+.l-tab.active { color: var(--pink-deep); border-bottom-color: var(--pink-deep); }
+.fl { font-size: 10px; font-weight: 600; color: var(--text-soft); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 5px; }
+.li { width: 100%; background: var(--warm-gray); border: 1px solid var(--border-strong); border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 13px; font-family: 'Open Sans', sans-serif; outline: none; transition: border-color .15s; margin-bottom: 13px; }
+.li:focus { border-color: var(--pink); }
+.li::placeholder { color: var(--text-soft); }
+.lbtn { width: 100%; padding: 12px; border-radius: 10px; background: var(--pink); color: #fff; font-size: 13px; font-weight: 600; font-family: 'Open Sans', sans-serif; cursor: pointer; border: none; transition: background .15s; }
+.lbtn:hover { background: var(--pink-deep); }
+.lbtn.client { background: var(--lavender); }
+.lbtn.client:hover { background: #7048aa; }
+.l-hint { font-size: 11px; color: var(--text-soft); text-align: center; margin-top: 14px; line-height: 1.7; }
+.l-hint strong { color: var(--text-mid); }
+.l-err { background: #FFF0F0; border: 1px solid #FFCDD2; color: var(--s-reject); font-size: 11px; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; display: none; }
+
+/* ── NAV ── */
+nav { display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 60px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.n-left { display: flex; align-items: center; gap: 16px; }
+.n-divider { width: 1px; height: 20px; background: var(--border-strong); }
+.n-context { font-size: 11px; color: var(--text-soft); }
+.n-right { display: flex; align-items: center; gap: 10px; }
+.badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: .3px; }
+.badge-pink { background: var(--pink-light); color: var(--pink-deep); }
+.badge-hp { background: var(--hp-light); color: var(--hp); }
+.badge-client { background: var(--green-light); color: #1B5E20; }
+.nav-btn { font-size: 11px; font-weight: 600; color: var(--text-mid); padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: transparent; cursor: pointer; font-family: 'Open Sans', sans-serif; transition: all .15s; }
+.nav-btn:hover { background: var(--warm-gray); color: var(--text); }
+.av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; font-family: 'Open Sans', sans-serif; flex-shrink: 0; }
+
+/* ── SHELL ── */
+.shell { display: flex; min-height: calc(100vh - 60px); }
+aside { width: 256px; flex-shrink: 0; background: #fff; border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction:column; }
+.s-label { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-soft); text-transform: uppercase; padding: 0 20px 6px; }
+.snav { list-style: none; margin-bottom: 20px; }
+.snav li a { display: flex; align-items: center; gap: 9px; padding: 8px 20px; font-size: 12px; font-weight: 500; color: var(--text-mid); cursor: pointer; border-left: 2px solid transparent; transition: all .15s; }
+.snav li a:hover { color: var(--text); background: var(--warm-gray); }
+.snav li a.active { color: var(--pink-deep); border-left-color: var(--pink); background: var(--pink-pale); font-weight: 600; }
+.s-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; flex-shrink: 0; }
+.s-dot.upload { background: var(--s-approve); opacity: 1; }
+.spill { margin-left: auto; font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 10px; }
+.spill-pink { background: var(--pink-light); color: var(--pink-deep); }
+.spill-new { background: var(--green-light); color: #1B5E20; }
+.team-list { padding: 0 12px; display: flex; flex-direction: column; gap: 2px; }
+.tm { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+.tm:hover, .tm.me { background: var(--warm-gray); }
+.tm-info { flex: 1; min-width: 0; }
+.tm-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.tm-role { font-size: 9px; color: var(--text-soft); }
+.online { width: 6px; height: 6px; border-radius: 50%; background: var(--s-approve); flex-shrink: 0; }
+.offline { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; }
+
+/* ── MAIN ── */
+main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gray); }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.page-title { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 600; color: var(--black); }
+.page-sub { font-size: 12px; color: var(--text-mid); margin-top: 4px; }
+.hbtns { display: flex; gap: 8px; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: 'Open Sans', sans-serif; transition: all .15s; }
+.btn-ghost { background: #fff; color: var(--text); border: 1px solid var(--border-strong); }
+.btn-ghost:hover { background: var(--warm-gray); }
+.btn-pink { background: var(--pink); color: #fff; }
+.btn-pink:hover { background: var(--pink-deep); }
+.btn-approve { background: rgba(52,168,83,.1); color: var(--s-approve); border: 1px solid rgba(52,168,83,.3); }
+.btn-approve:hover { background: rgba(52,168,83,.2); }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.sc { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.sl { font-size: 9px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.sv { font-family: 'Source Serif 4', serif; font-size: 28px; font-weight: 700; color: var(--black); line-height: 1; }
+.ss { font-size: 10px; color: var(--text-soft); margin-top: 4px; }
+
+/* WORKFLOW BAR */
+.wf-bar { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 11px 16px; margin-bottom: 22px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.wf-label { font-size: 9px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: .8px; margin-right: 6px; }
+.wf-s { font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 10px; border: 1px solid; }
+.wf-1 { background: rgba(128,117,255,.08); color: var(--slate); border-color: rgba(128,117,255,.25); }
+.wf-2 { background: rgba(138,95,190,.08); color: var(--lavender); border-color: rgba(138,95,190,.25); }
+.wf-3 { background: rgba(255,151,169,.1); color: var(--pink-deep); border-color: rgba(255,151,169,.35); }
+.wf-4 { background: rgba(0,150,214,.07); color: var(--hp); border-color: rgba(0,150,214,.25); }
+.wf-5 { background: rgba(52,168,83,.08); color: var(--s-approve); border-color: rgba(52,168,83,.25); }
+.wf-arrow { color: var(--text-soft); font-size: 12px; }
+.wf-note { font-size: 10px; color: var(--text-soft); margin-left: 8px; }
+
+/* ASSET GRID */
+.grid-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.grid-title { font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 600; }
+.ag { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 28px; }
+.ac { background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all .15s; cursor: pointer; }
+.ac:hover { border-color: var(--pink); box-shadow: 0 4px 20px rgba(255,151,169,.12); transform: translateY(-1px); }
+.ap { height: 138px; display: flex; align-items: center; justify-content: center; position: relative; }
+.ap-lbl { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,.45); color: #fff; font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .5px; }
+.ap-fmt { position: absolute; top: 8px; right: 8px; font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .5px; text-transform: uppercase; border: 1px solid; }
+.ab { padding: 12px 14px; }
+.a-stage { display: flex; gap: 5px; margin-bottom: 7px; }
+.a-title { font-size: 12px; font-weight: 600; color: var(--black); margin-bottom: 2px; line-height: 1.35; }
+.a-meta { font-size: 10px; color: var(--text-mid); margin-bottom: 8px; }
+.a-meta span { color: var(--hp); }
+.a-box { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--hp); margin-bottom: 8px; font-weight: 600; background: var(--hp-light); padding: 5px 8px; border-radius: 6px; }
+.a-box a { color: var(--hp); }
+.a-box a:hover { color: var(--hp); }
+.box-ic { width: 11px; height: 11px; background: var(--hp); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #fff; font-weight: 700; flex-shrink: 0; }
+.aa { display: flex; gap: 5px; flex-wrap: wrap; }
+.xb { padding: 5px 9px; border-radius: 6px; font-size: 9px; font-weight: 700; cursor: pointer; border: 1px solid; transition: all .15s; font-family: 'Open Sans', sans-serif; white-space: nowrap; letter-spacing: .3px; }
+.xb-ok { border-color: rgba(52,168,83,.35); color: var(--s-approve); background: rgba(52,168,83,.07); }
+.xb-ok:hover,.xb-ok.on { background: var(--s-approve); color: #fff; border-color: var(--s-approve); }
+.xb-rj { border-color: rgba(229,57,53,.3); color: var(--s-reject); background: rgba(229,57,53,.06); }
+.xb-rj:hover { background: rgba(229,57,53,.12); }
+.xb-fl { border-color: rgba(244,96,122,.35); color: var(--pink-deep); background: rgba(255,151,169,.07); }
+.xb-fl:hover,.xb-fl.flagged { background: var(--pink); color: #fff; border-color: var(--pink); }
+.xb-re { border-color: rgba(128,117,255,.3); color: var(--slate); background: rgba(128,117,255,.06); }
+.xb-re:hover { background: rgba(128,117,255,.12); }
+.xb-locked { border-color: var(--border); color: var(--text-soft); background: transparent; cursor: not-allowed; opacity: .4; }
+
+/* APPROVALS */
+.alog-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 7px; transition: border-color .15s; }
+.alog-row:hover { border-color: var(--pink); }
+.alog-l { display: flex; align-items: center; gap: 11px; }
+.alog-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.alog-name { font-size: 12px; font-weight: 600; color: var(--black); }
+.alog-meta { font-size: 10px; color: var(--text-mid); margin-top: 1px; }
+.alog-r { display: flex; align-items: center; gap: 12px; }
+.mav-stack { display: flex; }
+.mav { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; border: 2px solid #fff; margin-left: -5px; }
+.mav:first-child { margin-left: 0; }
+.st-badge { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: .3px; text-transform: uppercase; }
+.st-pending { background: rgba(128,117,255,.12); color: var(--slate); }
+.st-approved { background: rgba(52,168,83,.12); color: var(--s-approve); }
+.st-flagged { background: rgba(255,151,169,.2); color: var(--pink-deep); font-weight: 800; }
+.st-review { background: rgba(0,150,214,.1); color: var(--hp); }
+
+/* USERS */
+.ug { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.uc { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 11px; transition: border-color .15s; }
+.uc:hover { border-color: var(--pink); }
+.uc-top { display: flex; align-items: center; gap: 11px; }
+.ual { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.u-name { font-size: 13px; font-weight: 600; color: var(--black); }
+.u-email { font-size: 10px; color: var(--text-soft); margin-top: 1px; }
+.u-rtag { display: inline-block; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-top: 3px; letter-spacing: .3px; text-transform: uppercase; }
+.r-owner { background: rgba(245,230,99,.3); color: #7A6500; }
+.r-am { background: rgba(0,150,214,.1); color: var(--hp); }
+.r-cd { background: rgba(52,168,83,.1); color: #1B5E20; }
+.r-pm { background: rgba(138,95,190,.12); color: var(--lavender); }
+.r-cc { background: rgba(255,151,169,.15); color: var(--pink-deep); }
+.r-vd { background: rgba(188,244,245,.4); color: #006064; }
+.perm-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+.pt2 { font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 6px; background: var(--warm-gray); color: var(--text-soft); border: 1px solid var(--border); }
+.pt2.on { background: rgba(52,168,83,.08); color: var(--s-approve); border-color: rgba(52,168,83,.25); }
+.pt2.flag { background: var(--pink-pale); color: var(--pink-deep); border-color: rgba(255,151,169,.35); }
+.u-stats { display: flex; gap: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.u-stat-v { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 700; }
+.u-stat-l { font-size: 9px; color: var(--text-soft); margin-top: 1px; }
+
+/* BOX PANEL */
+.box-panel { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+.bp-title { font-size: 12px; font-weight: 600; color: var(--black); margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+.bp-month { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); padding: 0 0 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+.box-cat { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 7px; background: var(--warm-gray); margin-bottom: 5px; }
+.box-cat-name { font-size: 11px; font-weight: 600; color: var(--text); }
+.box-stages { display: flex; gap: 4px; flex-wrap: wrap; }
+.bsb { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 6px; cursor: pointer; border: 1px solid; transition: all .15s; text-decoration: none; display: inline-block; letter-spacing: .3px; }
+.bsb1 { border-color: rgba(128,117,255,.3); color: var(--slate); background: rgba(128,117,255,.07); }
+.bsb1:hover { background: rgba(128,117,255,.18); }
+.bsb2 { border-color: rgba(138,95,190,.3); color: var(--lavender); background: rgba(138,95,190,.07); }
+.bsb2:hover { background: rgba(138,95,190,.18); }
+.bsb3 { border-color: rgba(255,151,169,.35); color: var(--pink-deep); background: var(--pink-pale); }
+.bsb3:hover { background: rgba(255,151,169,.18); }
+.bsb4 { border-color: rgba(0,150,214,.25); color: var(--hp); background: rgba(0,150,214,.07); }
+.bsb4:hover { background: rgba(0,150,214,.18); }
+.bsb5 { border-color: rgba(52,168,83,.3); color: var(--s-approve); background: rgba(52,168,83,.07); }
+.bsb5:hover { background: rgba(52,168,83,.18); }
+
+/* INFO BOXES */
+.info-box { background: rgba(0,150,214,.06); border: 1px solid rgba(0,150,214,.2); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--text); margin-bottom: 14px; line-height: 1.6; }
+.success-box { background: rgba(52,168,83,.06); border: 1px solid rgba(52,168,83,.2); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--text); margin-bottom: 14px; line-height: 1.6; display: flex; align-items: center; gap: 8px; }
+
+/* UPLOAD */
+.up-prog { display: flex; align-items: center; gap: 0; margin-bottom: 24px; }
+.up-step { display: flex; align-items: center; gap: 7px; flex: 1; }
+.up-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; border: 1.5px solid var(--border-strong); color: var(--text-soft); background: #fff; transition: all .2s; }
+.up-dot.active { background: var(--pink-pale); border-color: var(--pink); color: var(--pink-deep); }
+.up-dot.done { background: var(--pink); border-color: var(--pink); color: #fff; }
+.up-lbl { font-size: 10px; color: var(--text-soft); }
+.up-lbl.active { color: var(--pink-deep); font-weight: 600; }
+.up-line { flex: 1; height: 1px; background: var(--border-strong); margin: 0 6px; }
+.up-line.done { background: var(--pink); }
+.month-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.m-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 13px; cursor: pointer; transition: all .15s; }
+.m-card:hover { border-color: var(--pink); background: var(--pink-pale); }
+.m-card.sel { border-color: var(--pink); background: var(--pink-pale); border-width: 1.5px; }
+.m-name { font-size: 12px; font-weight: 600; color: var(--black); }
+.m-sub { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
+.m-card.sel .m-sub { color: var(--pink-deep); }
+.cat-list { display: flex; flex-direction: column; gap: 7px; }
+.cat-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 13px 14px; cursor: pointer; transition: all .15s; }
+.cat-card:hover { border-color: var(--pink); background: var(--pink-pale); }
+.cat-card.sel { border-color: var(--pink); background: var(--pink-pale); border-width: 1.5px; }
+.cat-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.cat-name { font-size: 12px; font-weight: 600; color: var(--black); }
+.cat-desc { font-size: 10px; color: var(--text-soft); margin-top: 2px; }
+.type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.type-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; cursor: pointer; transition: all .15s; }
+.type-card:hover { border-color: var(--pink); background: var(--pink-pale); }
+.type-card.sel { border-color: var(--pink); background: var(--pink-pale); border-width: 1.5px; }
+.type-emoji { font-size: 26px; margin-bottom: 6px; }
+.type-name { font-size: 13px; font-weight: 600; color: var(--black); }
+.type-dim { font-size: 10px; color: var(--text-soft); margin-top: 3px; }
+.fmt-sel { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--warm-gray); color: var(--text); font-size: 12px; font-family: 'Open Sans', sans-serif; outline: none; }
+.fmt-sel:focus { border-color: var(--pink); }
+.summary-box { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.sum-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+.sum-row:last-child { border-bottom: none; }
+.sum-key { color: var(--text-soft); }
+.sum-val { font-weight: 600; color: var(--black); }
+.sum-val.code { font-family: monospace; color: var(--pink-deep); }
+.box-path-row { display: flex; align-items: center; gap: 8px; background: var(--hp-light); border: 1px solid rgba(0,150,214,.2); border-radius: 8px; padding: 9px 12px; margin-bottom: 12px; font-size: 10px; font-family: monospace; color: var(--hp); }
+.box-open { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 5px; background: var(--hp); color: #fff; cursor: pointer; border: none; font-family: 'Open Sans', sans-serif; white-space: nowrap; }
+.dropzone { border: 1.5px dashed var(--border-strong); border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: all .2s; background: var(--warm-gray); margin-bottom: 12px; }
+.dropzone:hover, .dropzone.drag { border-color: var(--pink); background: var(--pink-pale); }
+.dropzone.has-file { border-color: var(--s-approve); background: rgba(52,168,83,.04); }
+.dz-icon { font-size: 28px; margin-bottom: 8px; }
+.dz-main { font-size: 12px; font-weight: 600; color: var(--black); margin-bottom: 3px; }
+.dz-sub { font-size: 10px; color: var(--text-soft); }
+.up-success { text-align: center; padding: 36px 16px; display: none; }
+.btn-row { display: flex; gap: 7px; margin-top: 14px; }
+
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="ls">
+<div class="lb">
+  <div class="l-logo">
+    <div class="mmg-logo">
+      <svg class="mmg-m" viewBox="0 0 60 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mg" x1="0" y1="0" x2="60" y2="52" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#FF7A9A"/>
+            <stop offset="100%" stop-color="#FF97A9"/>
+          </linearGradient>
+        </defs>
+        <circle cx="10" cy="42" r="10" fill="url(#mg)"/>
+        <circle cx="26" cy="20" r="14" fill="url(#mg)"/>
+        <circle cx="50" cy="20" r="14" fill="url(#mg)" opacity=".85"/>
+        <circle cx="36" cy="42" r="8" fill="url(#mg)" opacity=".7"/>
+      </svg>
+      <div class="mmg-wordmark"><span>The Motivated</span><span>Mind Group</span></div>
+    </div>
+  </div>
+  <h2 class="l-title">HP Content Engine</h2>
+  <p class="l-sub">Review, approve, and deliver HP consumer content — all in one place.</p>
+  <div style="margin-bottom:24px;">
+    <div style="display:inline-block;background:var(--pink-light);color:var(--pink-deep);font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.5px;">MMG INTERNAL TOOL</div>
+  </div>
+  <div id="pi">
+    <div class="l-err" id="ei">Incorrect login or password.</div>
+    <div class="fl">Name or email</div>
+    <input class="li" id="ie" type="text" placeholder="your name or email address">
+    <div class="fl">Password</div>
+    <input class="li" id="ip" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="lbtn" onclick="doLogin()">Sign In</button>
+    <div class="l-hint">Use your first name or MMG email · Password: <strong>hp2025</strong></div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- BOX SETUP MODAL -->
+<div id="box-modal" style="display:none;">
+  <div class="box-setup">
+    <div class="box-setup-card">
+      <div class="box-setup-logo">
+        <div class="box-ic" style="width:24px;height:24px;font-size:14px;">B</div>
+        <div style="font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;">Box Connection</div>
+      </div>
+      <div class="box-setup-title">Connect to Box</div>
+      <div class="box-setup-sub">Enter your Box developer token to enable live asset loading, real approvals, and activity tracking. Your token stays in your browser session only.</div>
+      <div class="box-token-hint">
+        Get your token: <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a> → your app → Generate Developer Token. Valid for 60 minutes — you can reconnect anytime from Settings.
+      </div>
+      <input class="box-token-input" id="box-token-input" type="password" placeholder="paste your Box developer token here...">
+      <div id="box-connect-err" style="font-size:11px;color:var(--s-reject);margin-bottom:10px;display:none;">Token invalid or expired. Please generate a fresh token.</div>
+      <button class="box-connect-btn" onclick="connectBox()">Connect to Box ↗</button>
+      <button class="box-skip-btn" onclick="skipBox()">Continue without Box connection</button>
+      <div class="box-status-bar">
+        <span>⚡</span>
+        <span>Connecting to Box enables: real asset thumbnails · approve/reject moves files · live activity log · direct uploads</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERNAL VIEW -->
+<div id="iv" style="display:none;">
+<nav>
+  <div class="n-left">
+    <div class="mmg-logo">
+      <svg class="mmg-m" style="width:28px;height:24px;" viewBox="0 0 60 52" fill="none">
+        <defs><linearGradient id="mg2" x1="0" y1="0" x2="60" y2="52" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#FF7A9A"/><stop offset="100%" stop-color="#FF97A9"/></linearGradient></defs>
+        <circle cx="10" cy="42" r="10" fill="url(#mg2)"/><circle cx="26" cy="20" r="14" fill="url(#mg2)"/><circle cx="50" cy="20" r="14" fill="url(#mg2)" opacity=".85"/><circle cx="36" cy="42" r="8" fill="url(#mg2)" opacity=".7"/>
+      </svg>
+      <div class="mmg-wordmark" style="font-size:11px;"><span>Motivated Mind Group</span></div>
+    </div>
+    <div class="n-divider"></div>
+    <div class="n-context">HP Content Engine</div>
+  </div>
+  <div class="n-right">
+    <div class="badge badge-pink" id="batch-badge">BATCH: APRIL 2026</div>
+    <div class="badge" id="box-status" style="background:rgba(52,168,83,.15);color:#1B5E20;">⬤ Box Connected</div>
+    <div id="iav" class="av"></div>
+    <button class="nav-btn" onclick="logout()">Sign Out</button>
+  </div>
+</nav>
+<div class="shell">
+<aside>
+  <div class="s-label">Navigation</div>
+  <ul class="snav">
+    <li><a class="active" onclick="showIT('review',this)"><span class="s-dot"></span>Content Review<span class="spill spill-pink">7</span></a></li>
+    <li><a onclick="showIT('approvals',this)"><span class="s-dot"></span>Approvals Log</a></li>
+    <li><a onclick="showIT('activity',this)" id="activity-nav"><span class="s-dot" style="background:var(--pink);opacity:1;"></span>Activity Log<span class="spill spill-pink" id="activity-count">0</span></a></li>
+    <li><a onclick="showIT('upload',this)"><span class="s-dot upload"></span>Upload Asset<span class="spill spill-new">+ New</span></a></li>
+    <li><a onclick="showIT('users',this)"><span class="s-dot"></span>Team Members</a></li>
+    <li><a onclick="showIT('box',this)"><span class="s-dot"></span>Box Storage<span class="spill spill-pink">100</span></a></li>
+
+    <li><a><span class="s-dot"></span>History</a></li>
+    <li><a onclick="showBoxSetup()"><span class="s-dot"></span>Reconnect Box</a></li>
+  </ul>
+  <div class="s-label">Team</div>
+  <div class="team-list">
+    <div class="tm" id="sb-BG"><div class="av" style="background:rgba(245,230,99,.25);color:#7A6500;">BG</div><div class="tm-info"><div class="tm-name">Bill G.</div><div class="tm-role">Owner</div></div><div class="online"></div></div>
+    <div class="tm" id="sb-JM"><div class="av" style="background:rgba(0,150,214,.15);color:var(--hp);">JM</div><div class="tm-info"><div class="tm-name">Jeff M.</div><div class="tm-role">Account Manager</div></div><div class="online"></div></div>
+    <div class="tm" id="sb-BK"><div class="av" style="background:rgba(52,168,83,.15);color:#1B5E20;">BK</div><div class="tm-info"><div class="tm-name">Bryan K.</div><div class="tm-role">Creative Director</div></div><div class="online"></div></div>
+    <div class="tm" id="sb-DL"><div class="av" style="background:rgba(138,95,190,.15);color:var(--lavender);">DL</div><div class="tm-info"><div class="tm-name">Deni L.</div><div class="tm-role">Project Manager</div></div><div class="offline"></div></div>
+    <div class="tm" id="sb-RS"><div class="av" style="background:rgba(255,151,169,.2);color:var(--pink-deep);">RS</div><div class="tm-info"><div class="tm-name">Rob S.</div><div class="tm-role">Content Creator</div></div><div class="online"></div></div>
+    <div class="tm" id="sb-TW"><div class="av" style="background:rgba(188,244,245,.35);color:#006064;">TW</div><div class="tm-info"><div class="tm-name">Tracy W.</div><div class="tm-role">Visual Designer</div></div><div class="offline"></div></div>
+    <div class="tm" id="sb-PC"><div class="av" style="background:rgba(128,117,255,.15);color:var(--slate);">PC</div><div class="tm-info"><div class="tm-name">Paul C.</div><div class="tm-role">Creative Dir. / Visual</div></div><div class="online"></div></div>
+  </div>
+</aside>
+<main>
+
+<!-- REVIEW TAB -->
+<div id="it-review">
+  <div class="page-head">
+    <div><div class="page-title">Content Batches</div><div class="page-sub">Review and approve assets before sending to HP · <strong style="color:var(--pink-deep);">Bill has final approval</strong></div></div>
+    <div class="hbtns"><button class="btn btn-ghost">↻ Regenerate All</button><button class="btn btn-pink" onclick="approveAll()">Approve All ✓</button></div>
+  </div>
+  <div class="stats">
+    <div class="sc"><div class="sl">Total Assets</div><div class="sv" style="color:var(--pink);">7</div><div class="ss">3 TikToks · 4 Memes</div></div>
+    <div class="sc"><div class="sl">Approved</div><div class="sv" style="color:var(--s-approve);">2</div><div class="ss">Ready to flag for HP</div></div>
+    <div class="sc"><div class="sl">Pending Review</div><div class="sv" style="color:var(--slate);">5</div><div class="ss">Needs MMG review</div></div>
+    <div class="sc"><div class="sl">Flagged for HP</div><div class="sv" style="color:var(--pink-deep);" id="flag-count">2</div><div class="ss">Visible in client portal</div></div>
+  </div>
+  <div class="wf-bar">
+    <span class="wf-label">Workflow:</span>
+    <span class="wf-s wf-1">01 AI Draft</span><span class="wf-arrow">→</span>
+    <span class="wf-s wf-2">02 MMG Review</span><span class="wf-arrow">→</span>
+    <span class="wf-s wf-3">03 Approved</span><span class="wf-arrow">→</span>
+    <span class="wf-s wf-4">04 Client Feedback</span><span class="wf-arrow">→</span>
+    <span class="wf-s wf-5">05 FINAL</span>
+    <span class="wf-note">· Bill has final approval · Only Bill, Jeff, Bryan, Deni, Rob can flag for HP</span>
+  </div>
+
+  <!-- APRIL 2026 ACCORDION -->
+  <div class="acc-month active" id="acc-apr">
+    <div class="acc-header" onclick="toggleAcc('apr')">
+      <div class="acc-title">
+        April 2026
+        <span class="acc-meta">Current batch</span>
+        <div class="acc-pills">
+          <span class="wf-s wf-3">2 Approved</span>
+          <span class="wf-s wf-2">5 Pending</span>
+        </div>
+      </div>
+      <div class="acc-chevron open" id="chev-apr">›</div>
+    </div>
+    <div class="acc-body open" id="body-apr">
+      <div class="grid-head"><div class="grid-title">TikToks (3)</div></div>
+      <div class="ag">
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374600284092')">
+          <div class="ap" style="background:linear-gradient(135deg,#FFE8ED,#FFC4D0);">
+            <div style="text-align:center;"><div style="font-size:32px;margin-bottom:5px;">🎬</div><div style="font-size:8px;color:var(--pink-deep);letter-spacing:1px;font-weight:700;">HP INSTANT INK</div></div>
+            <div class="ap-lbl">TikTok #1</div><div class="ap-fmt" style="background:rgba(255,151,169,.2);color:var(--pink-deep);border-color:rgba(255,151,169,.4);">GREEN SCREEN</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374600284092" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Ink / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-3">03 Approved</span></div>
+            <div class="a-title">Shia — "NOT. GONNA. DO. IT."</div>
+            <div class="a-meta">Category: <span>Ink / Instant Ink</span> · Assigned: Rob S.</div>
+            <div class="aa">
+              <button class="xb xb-ok on" onclick="event.stopPropagation()">✓ Approved</button>
+              <button class="xb xb-fl flagged" id="flag-1" onclick="event.stopPropagation()">⚑ Flagged for HP</button>
+              <button class="xb xb-re" onclick="event.stopPropagation()">↻ Regen</button>
+            </div>
+          </div>
+        </div>
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374603776671')">
+          <div class="ap" style="background:linear-gradient(135deg,#EDE4F8,#D4C2EF);">
+            <div style="text-align:center;"><div style="font-size:32px;margin-bottom:5px;">💻</div><div style="font-size:8px;color:var(--lavender);letter-spacing:1px;font-weight:700;">HP SPECTRE x360</div></div>
+            <div class="ap-lbl">TikTok #2</div><div class="ap-fmt" style="background:rgba(138,95,190,.15);color:var(--lavender);border-color:rgba(138,95,190,.3);">POV FORMAT</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374603776671" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Laptops / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-2">02 MMG Review</span></div>
+            <div class="a-title">POV: You just got the HP Spectre x360</div>
+            <div class="a-meta">Category: <span>Laptops / Desktops</span> · Assigned: Tracy W.</div>
+            <div class="aa">
+              <button class="xb xb-ok" onclick="event.stopPropagation();toggleABox(this)">Approve</button>
+              <button class="xb xb-fl" id="flag-2" onclick="event.stopPropagation();toggleFlagBox(this,2)" data-can="true">⚑ Flag for HP</button>
+              <button class="xb xb-rj" onclick="event.stopPropagation()">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374602221381')">
+          <div class="ap" style="background:linear-gradient(135deg,#E0F8F0,#B4EBCA);">
+            <div style="text-align:center;"><div style="font-size:32px;margin-bottom:5px;">🖨️</div><div style="font-size:8px;color:#1B5E20;letter-spacing:1px;font-weight:700;">HP OFFICEJET PRO</div></div>
+            <div class="ap-lbl">TikTok #3</div><div class="ap-fmt" style="background:rgba(52,168,83,.15);color:#1B5E20;border-color:rgba(52,168,83,.3);">DUET TREND</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374602221381" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Printers / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-2">02 MMG Review</span></div>
+            <div class="a-title">HP prints faster than your excuse</div>
+            <div class="a-meta">Category: <span>Printers / Scanners</span> · Assigned: Rob S.</div>
+            <div class="aa">
+              <button class="xb xb-ok" onclick="event.stopPropagation();toggleABox(this)">Approve</button>
+              <button class="xb xb-fl" id="flag-3" onclick="event.stopPropagation();toggleFlagBox(this,3)" data-can="true">⚑ Flag for HP</button>
+              <button class="xb xb-rj" onclick="event.stopPropagation()">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-head"><div class="grid-title">Memes (4)</div></div>
+      <div class="ag">
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374600284092')">
+          <div class="ap" style="background:linear-gradient(135deg,#FFE8ED,#FFC4D0);">
+            <div style="text-align:center;"><div style="font-size:30px;margin-bottom:5px;">😤</div><div style="font-size:8px;color:var(--pink-deep);letter-spacing:1px;font-weight:700;">DRAKE FORMAT</div></div>
+            <div class="ap-lbl">Meme #1</div><div class="ap-fmt" style="background:rgba(255,151,169,.2);color:var(--pink-deep);border-color:rgba(255,151,169,.4);">DRAKE</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374600284092" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Ink / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-3">03 Approved</span></div>
+            <div class="a-title">Off-brand ink ✕ / HP Instant Ink ✓</div>
+            <div class="a-meta">Category: <span>Ink Cartridges</span> · Assigned: Paul C.</div>
+            <div class="aa">
+              <button class="xb xb-ok on" onclick="event.stopPropagation()">✓ Approved</button>
+              <button class="xb xb-fl flagged" id="flag-4" onclick="event.stopPropagation()">⚑ Flagged for HP</button>
+              <button class="xb xb-re" onclick="event.stopPropagation()">↻ Regen</button>
+            </div>
+          </div>
+        </div>
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374602221381')">
+          <div class="ap" style="background:linear-gradient(135deg,#E6F4FB,#BCF4F5);">
+            <div style="text-align:center;"><div style="font-size:30px;margin-bottom:5px;">😂</div><div style="font-size:8px;color:var(--hp);letter-spacing:1px;font-weight:700;">COUPLE RELATABLE</div></div>
+            <div class="ap-lbl">Meme #2</div><div class="ap-fmt" style="background:rgba(0,150,214,.12);color:var(--hp);border-color:rgba(0,150,214,.3);">COUPLE</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374602221381" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Printers / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-2">02 MMG Review</span></div>
+            <div class="a-title">Husband 1 doc / Wife 47 docs at 2am</div>
+            <div class="a-meta">Category: <span>Printers / MFP</span> · Assigned: Tracy W.</div>
+            <div class="aa">
+              <button class="xb xb-ok" onclick="event.stopPropagation();toggleABox(this)">Approve</button>
+              <button class="xb xb-fl" id="flag-5" onclick="event.stopPropagation();toggleFlagBox(this,5)" data-can="true">⚑ Flag for HP</button>
+              <button class="xb xb-rj" onclick="event.stopPropagation()">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374599525775')">
+          <div class="ap" style="background:linear-gradient(135deg,#F0EDF8,#DDD5F0);">
+            <div style="text-align:center;"><div style="font-size:30px;margin-bottom:5px;">🖥️</div><div style="font-size:8px;color:var(--lavender);letter-spacing:1px;font-weight:700;">IYKYK</div></div>
+            <div class="ap-lbl">Meme #3</div><div class="ap-fmt" style="background:rgba(138,95,190,.12);color:var(--lavender);border-color:rgba(138,95,190,.25);">IYKYK</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374599525775" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Monitors / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-2">02 MMG Review</span></div>
+            <div class="a-title">IYKYK: dual HP monitors changed my life</div>
+            <div class="a-meta">Category: <span>Monitors</span> · Assigned: Paul C.</div>
+            <div class="aa">
+              <button class="xb xb-ok" onclick="event.stopPropagation();toggleABox(this)">Approve</button>
+              <button class="xb xb-fl" id="flag-6" onclick="event.stopPropagation();toggleFlagBox(this,6)" data-can="true">⚑ Flag for HP</button>
+              <button class="xb xb-rj" onclick="event.stopPropagation()">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+        <div class="ac" onclick="openBox('https://app.box.com/folder/374603776671')">
+          <div class="ap" style="background:linear-gradient(135deg,#FDF7DC,#F5E663);">
+            <div style="text-align:center;"><div style="font-size:30px;margin-bottom:5px;">🏆</div><div style="font-size:8px;color:#7A6500;letter-spacing:1px;font-weight:700;">BEFORE / AFTER</div></div>
+            <div class="ap-lbl">Meme #4</div><div class="ap-fmt" style="background:rgba(245,230,99,.3);color:#7A6500;border-color:rgba(245,230,99,.6);">COMPARISON</div>
+          </div>
+          <div class="ab">
+            <div class="a-box" onclick="event.stopPropagation()"><div class="box-ic">B</div><a href="https://app.box.com/folder/374603776671" target="_blank" onclick="event.stopPropagation()">Open in Box: April / Laptops / 01-AI-Draft ↗</a></div>
+            <div class="a-stage"><span class="wf-s wf-2">02 MMG Review</span></div>
+            <div class="a-title">Old PC vs HP OMEN — no contest</div>
+            <div class="a-meta">Category: <span>Desktops / Gaming</span> · Assigned: Bryan K.</div>
+            <div class="aa">
+              <button class="xb xb-ok" onclick="event.stopPropagation();toggleABox(this)">Approve</button>
+              <button class="xb xb-fl" id="flag-7" onclick="event.stopPropagation();toggleFlagBox(this,7)" data-can="true">⚑ Flag for HP</button>
+              <button class="xb xb-rj" onclick="event.stopPropagation()">✕ Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARCH 2026 ACCORDION -->
+  <div class="acc-month" id="acc-mar">
+    <div class="acc-header" onclick="toggleAcc('mar')">
+      <div class="acc-title">
+        March 2026
+        <span class="acc-meta">Previous batch</span>
+        <div class="acc-pills"><span class="wf-s wf-5">Archived</span></div>
+      </div>
+      <div class="acc-chevron" id="chev-mar">›</div>
+    </div>
+    <div class="acc-body" id="body-mar">
+      <div style="text-align:center;padding:28px;color:var(--text-soft);">
+        <div style="font-size:24px;margin-bottom:8px;">📁</div>
+        <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:4px;">March 2026 assets are in Box</div>
+        <div style="font-size:12px;margin-bottom:16px;">Browse the March batch directly in Box Storage.</div>
+        <a href="https://app.box.com/folder/374604714372" target="_blank"><button class="btn btn-pink">Open March 2026 in Box ↗</button></a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- APPROVALS TAB -->
+<div id="it-approvals" style="display:none;">
+  <div class="page-head"><div><div class="page-title">Approvals Log</div><div class="page-sub">Full audit trail — grouped by month — who acted, what stage, when</div></div></div>
+
+  <!-- APRIL 2026 -->
+  <div class="acc-month active" id="acc-log-apr">
+    <div class="acc-header" onclick="toggleAcc('log-apr')">
+      <div class="acc-title">April 2026 <span class="acc-meta">Current batch · 5 assets</span></div>
+      <div class="acc-chevron open" id="chev-log-apr">›</div>
+    </div>
+    <div class="acc-body open" id="body-log-apr">
+      <div class="alog-row"><div class="alog-l"><div class="alog-icon" style="background:var(--pink-pale);">🎬</div><div><div class="alog-name">TikTok #1 — Shia "NOT. GONNA. DO. IT."</div><div class="alog-meta">Ink / Instant Ink · Rob S. created · Bill G. approved · Apr 1</div></div></div><div class="alog-r"><div class="mav-stack"><div class="mav" style="background:rgba(245,230,99,.3);color:#7A6500;">BG</div><div class="mav" style="background:rgba(0,150,214,.2);color:var(--hp);">JM</div></div><span class="st-badge st-flagged">⚑ Flagged for HP</span></div></div>
+      <div class="alog-row"><div class="alog-l"><div class="alog-icon" style="background:var(--pink-pale);">😤</div><div><div class="alog-name">Meme #1 — Drake: Off-brand vs HP Instant Ink</div><div class="alog-meta">Ink Cartridges · Paul C. created · Bill G. approved · Apr 1</div></div></div><div class="alog-r"><div class="mav-stack"><div class="mav" style="background:rgba(245,230,99,.3);color:#7A6500;">BG</div></div><span class="st-badge st-flagged">⚑ Flagged for HP</span></div></div>
+      <div class="alog-row"><div class="alog-l"><div class="alog-icon" style="background:rgba(138,95,190,.08);">💻</div><div><div class="alog-name">TikTok #2 — POV: HP Spectre x360</div><div class="alog-meta">Laptops · Tracy W. designed · Deni L. managing · Apr 1</div></div></div><div class="alog-r"><div class="mav-stack"><div class="mav" style="background:rgba(138,95,190,.2);color:var(--lavender);">DL</div></div><span class="st-badge st-review">02 MMG Review</span></div></div>
+      <div class="alog-row"><div class="alog-l"><div class="alog-icon" style="background:rgba(52,168,83,.08);">🖨️</div><div><div class="alog-name">TikTok #3 — HP prints faster than your excuse</div><div class="alog-meta">Printers · Rob S. created · Deni L. managing · Apr 1</div></div></div><div class="alog-r"><div class="mav-stack"><div class="mav" style="background:rgba(138,95,190,.2);color:var(--lavender);">DL</div></div><span class="st-badge st-review">02 MMG Review</span></div></div>
+      <div class="alog-row"><div class="alog-l"><div class="alog-icon" style="background:rgba(0,150,214,.08);">😂</div><div><div class="alog-name">Meme #2 — Husband 1 doc / Wife 47 docs</div><div class="alog-meta">Printers / MFP · Tracy W. designed · Apr 1</div></div></div><div class="alog-r"><div class="mav-stack"><div class="mav" style="background:rgba(188,244,245,.4);color:#006064;">TW</div></div><span class="st-badge st-review">02 MMG Review</span></div></div>
+    </div>
+  </div>
+
+  <!-- MARCH 2026 -->
+  <div class="acc-month" id="acc-log-mar">
+    <div class="acc-header" onclick="toggleAcc('log-mar')">
+      <div class="acc-title">March 2026 <span class="acc-meta">Previous batch · archived</span></div>
+      <div class="acc-chevron" id="chev-log-mar">›</div>
+    </div>
+    <div class="acc-body" id="body-log-mar">
+      <div style="text-align:center;padding:24px;color:var(--text-soft);">
+        <div style="font-size:12px;">March 2026 approvals will appear here as assets move through the workflow.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ACTIVITY TAB -->
+<div id="it-activity" style="display:none;">
+  <div class="page-head">
+    <div><div class="page-title">Activity Log</div><div class="page-sub">All actions taken on assets this session — approvals, uploads, flags, rejects</div></div>
+    <div class="hbtns"><button class="btn btn-ghost" onclick="clearActivity()">Clear log</button></div>
+  </div>
+
+  <div class="act-box-note">
+    <div class="box-ic">B</div>
+    <span>Every approval and upload is also written as a <strong>comment on the file in Box</strong> — permanently logged even after this session ends. <a href="https://app.box.com/folder/374589121452" target="_blank">Open Box to see all comments ↗</a></span>
+  </div>
+
+  <div class="act-filter">
+    <div class="act-chip on" onclick="filterActivity('all',this)">All actions</div>
+    <div class="act-chip" onclick="filterActivity('act-approve',this)">Approved</div>
+    <div class="act-chip" onclick="filterActivity('act-reject',this)">Rejected</div>
+    <div class="act-chip" onclick="filterActivity('act-flag',this)">Flagged for HP</div>
+    <div class="act-chip" onclick="filterActivity('act-upload',this)">Uploaded</div>
+  </div>
+
+  <div class="act-feed" id="act-feed">
+    <div class="act-empty" id="act-empty">
+      <div class="act-empty-icon">📋</div>
+      <div class="act-empty-text">No activity yet</div>
+      <div class="act-empty-sub">Actions you take on assets will appear here — approvals, uploads, flags, and rejects</div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD TAB -->
+<div id="it-upload" style="display:none;">
+  <div class="page-head"><div><div class="page-title">Upload Asset</div><div class="page-sub">4-step guided upload — routes your file to the correct Box folder automatically</div></div></div>
+  <div class="up-prog">
+    <div class="up-step"><div class="up-dot active" id="upd1">1</div><span class="up-lbl active" id="upl1">Month</span></div>
+    <div class="up-line" id="upline1"></div>
+    <div class="up-step"><div class="up-dot" id="upd2">2</div><span class="up-lbl" id="upl2">Category</span></div>
+    <div class="up-line" id="upline2"></div>
+    <div class="up-step"><div class="up-dot" id="upd3">3</div><span class="up-lbl" id="upl3">Type &amp; Format</span></div>
+    <div class="up-line" id="upline3"></div>
+    <div class="up-step"><div class="up-dot" id="upd4">4</div><span class="up-lbl" id="upl4">Upload</span></div>
+  </div>
+  <div id="ups1">
+    <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:4px;">Which month is this content for?</div>
+    <div style="font-size:11px;color:var(--text-mid);margin-bottom:14px;">Select the batch this asset belongs to.</div>
+    <div class="month-grid">
+      <div class="m-card" onclick="upSelMonth('2026-03-March','374604714372',this)"><div class="m-name">March 2026</div><div class="m-sub">Archive batch</div></div>
+      <div class="m-card" onclick="upSelMonth('2026-04-April','374603913307',this)"><div class="m-name">April 2026</div><div class="m-sub" style="color:var(--pink-deep);">Current batch</div></div>
+      <div class="m-card" onclick="upSelMonth('2026-05-May','374604474392',this)"><div class="m-name">May 2026</div><div class="m-sub">Upcoming batch</div></div>
+      <div class="m-card" onclick="upSelMonth('2025-05-May','374587418151',this)"><div class="m-name">May 2025</div><div class="m-sub">Archive</div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-pink" id="upnext1" disabled onclick="upStep(2)">Next: Category →</button></div>
+  </div>
+  <div id="ups2" style="display:none;">
+    <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:4px;">Which HP product category?</div>
+    <div style="font-size:11px;color:var(--text-mid);margin-bottom:14px;">Routes your file to the correct Box folder automatically.</div>
+    <div class="cat-list">
+      <div class="cat-card" onclick="upSelCat('Ink-InstantInk-Tank','Ink · Instant Ink · Tank',this)"><div class="cat-icon" style="background:var(--pink-pale);">🖨️</div><div><div class="cat-name">Ink · Instant Ink · Tank</div><div class="cat-desc">Cartridges, auto-refill subscriptions, ink tanks</div></div></div>
+      <div class="cat-card" onclick="upSelCat('Laptops-Desktops-PCs','Laptops · Desktops · PCs',this)"><div class="cat-icon" style="background:rgba(138,95,190,.1);">💻</div><div><div class="cat-name">Laptops · Desktops · PCs</div><div class="cat-desc">HP Spectre, ENVY, Pavilion, OMEN, EliteBook</div></div></div>
+      <div class="cat-card" onclick="upSelCat('Printers-Scanners-MFP','Printers · Scanners · MFP',this)"><div class="cat-icon" style="background:rgba(52,168,83,.1);">📠</div><div><div class="cat-name">Printers · Scanners · MFP</div><div class="cat-desc">OfficeJet, LaserJet, ScanJet, all-in-one devices</div></div></div>
+      <div class="cat-card" onclick="upSelCat('Monitors','Monitors',this)"><div class="cat-icon" style="background:rgba(245,230,99,.2);">🖥️</div><div><div class="cat-name">Monitors</div><div class="cat-desc">HP 24", 27", 4K, curved, gaming displays</div></div></div>
+      <div class="cat-card" onclick="upSelCat('Accessories','Accessories',this)"><div class="cat-icon" style="background:rgba(188,244,245,.3);">🖱️</div><div><div class="cat-name">Accessories</div><div class="cat-desc">Keyboards, mice, headsets, bags, docks</div></div></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-ghost" onclick="upStep(1)">← Back</button><button class="btn btn-pink" id="upnext2" disabled onclick="upStep(3)">Next: Asset Type →</button></div>
+  </div>
+  <div id="ups3" style="display:none;">
+    <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:4px;">Meme or TikTok?</div>
+    <div style="font-size:11px;color:var(--text-mid);margin-bottom:14px;">Sets the filename and tracks format history.</div>
+    <div class="type-row">
+      <div class="type-card" onclick="upSelType('Meme',this)"><div class="type-emoji">🖼️</div><div class="type-name">Meme</div><div class="type-dim">1080×1080 · JPG or PNG only</div></div>
+      <div class="type-card" onclick="upSelType('TikTok',this)"><div class="type-emoji">🎬</div><div class="type-name">TikTok</div><div class="type-dim">Upload concept card JPG — script is separate</div></div>
+    </div>
+    <div id="tiktok-note" style="display:none;background:var(--hp-light);border:1px solid rgba(0,150,214,.2);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--text);margin-bottom:12px;line-height:1.6;"><strong>TikTok uploads:</strong> Claude Code auto-generates two files — a Concept Card (JPG) and a Script (TXT). Upload the Concept Card here. The Script is in the same Box folder for Rob and Tracy to reference.</div>
+      <div id="up-fmt-wrap" style="display:none;margin-bottom:14px;">
+      <div class="fl">Format / Template used</div>
+      <select id="up-fmt-sel" class="fmt-sel" onchange="upFmtChange()"><option value="">— select format —</option></select>
+    </div>
+    <div class="btn-row"><button class="btn btn-ghost" onclick="upStep(2)">← Back</button><button class="btn btn-pink" id="upnext3" disabled onclick="upStep(4)">Next: Upload →</button></div>
+  </div>
+  <div id="ups4" style="display:none;">
+    <div style="font-size:13px;font-weight:600;color:var(--black);margin-bottom:14px;">Ready to upload</div>
+    <div class="summary-box">
+      <div class="sum-row"><span class="sum-key">Month</span><span class="sum-val" id="ups-month">—</span></div>
+      <div class="sum-row"><span class="sum-key">Category</span><span class="sum-val" id="ups-cat">—</span></div>
+      <div class="sum-row"><span class="sum-key">Type</span><span class="sum-val" id="ups-type">—</span></div>
+      <div class="sum-row"><span class="sum-key">Auto filename</span><span class="sum-val code" id="ups-fname">—</span></div>
+      <div style="font-size:10px;color:var(--text-soft);padding:6px 0;">Check Box for existing files and increment the number (001, 002, 003...) to avoid overwriting.</div>
+    </div>
+    <div class="box-path-row"><div class="box-ic">B</div><div style="flex:1;" id="ups-path">HP-Content-Engine / … / 01-AI-Draft</div><button class="box-open" onclick="upOpenBox()">Open in Box ↗</button></div>
+    <div class="dropzone" id="up-dropzone" onclick="document.getElementById('up-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="upHandleDrop(event)">
+      <div class="dz-icon" id="up-dz-icon">📁</div>
+      <div class="dz-main" id="up-dz-main">Drop your file here or click to browse</div>
+      <div class="dz-sub" id="up-dz-sub">Meme: JPG or PNG · TikTok: JPG concept card · Max 500MB</div>
+    </div>
+    <input type="file" id="up-file-input" style="display:none;" accept=".jpg,.jpeg,.png,.mp4,.txt" onchange="upHandleFile(this.files[0])">
+    <div class="btn-row"><button class="btn btn-ghost" onclick="upStep(3)">← Back</button><button class="btn" id="up-final-btn" disabled style="background:rgba(52,168,83,.12);color:var(--s-approve);border:1px solid rgba(52,168,83,.3);" onclick="upDoUpload()">Upload to Box ✓</button></div>
+    <div style="margin-top:10px;font-size:10px;color:var(--text-soft);text-align:center;">Or click "Open in Box" to go directly to the right folder and drag your file in manually.</div>
+  </div>
+  <div class="up-success" id="ups-success">
+    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <div class="page-title" style="font-size:18px;margin-bottom:8px;">Box folder is open</div>
+    <div style="font-size:12px;color:var(--text-mid);margin-bottom:22px;line-height:1.6;" id="ups-success-msg">Rename your file and drop it into the open Box folder.</div>
+    <div class="btn-row" style="justify-content:center;"><button class="btn btn-pink" onclick="upOpenBox()">Reopen Box ↗</button><button class="btn btn-ghost" onclick="upReset()">Upload another</button></div>
+  </div>
+</div>
+
+<!-- USERS TAB -->
+<div id="it-users" style="display:none;">
+  <div class="page-head"><div><div class="page-title">Team Members</div><div class="page-sub">Motivated Mind Group — 7 members · Roles &amp; permissions · Initials are auto-generated from your email — profile editing coming soon</div></div><div class="hbtns"><button class="btn btn-pink">+ Invite</button></div></div>
+  <div class="ug">
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(245,230,99,.2);color:#7A6500;">BG</div><div><div class="u-name">Bill Gusmano</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="781a111414561f0d0b15191617380c101d15170c110e190c1d1c1511161c1f0a170d08561b1715">[email&#160;protected]</a></div><span class="u-rtag r-owner">Owner / Exec Approver</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 on">Publish</span><span class="pt2 on">Manage Users</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">2</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">0</div><div class="u-stat-l">Pending</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(0,150,214,.1);color:var(--hp);">JM</div><div><div class="u-name">Jeff</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="307a555656704458555d5f445946514455545d595e5457425f45401e535f5d">[email&#160;protected]</a></div><span class="u-rtag r-am">Account Manager</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 on">Publish</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">1</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">1</div><div class="u-stat-l">Pending</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(52,168,83,.12);color:#1B5E20;">BK</div><div><div class="u-name">Bryan</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f3d0d061e113f0b171a12100b16091e0b1a1b1216111b180d100a0f511c1012">[email&#160;protected]</a></div><span class="u-rtag r-cd">Creative Director</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">1</div><div class="u-stat-l">Pending</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(138,95,190,.12);color:var(--lavender);">DL</div><div><div class="u-name">Deni</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1450717a7d54607c71797b607d6275607170797d7a7073667b61643a777b79">[email&#160;protected]</a></div><span class="u-rtag r-pm">Project Manager</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">Managing</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(255,151,169,.18);color:var(--pink-deep);">RS</div><div><div class="u-name">Rob</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="96c4f9f4d6e2fef3fbf9e2ffe0f7e2f3f2fbfff8f2f1e4f9e3e6b8f5f9fb">[email&#160;protected]</a></div><span class="u-rtag r-cc">Content Creator</span></div></div><div class="perm-wrap"><span class="pt2">Approve</span><span class="pt2">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Created</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">In Review</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(188,244,245,.35);color:#006064;">TW</div><div><div class="u-name">Tracy</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="90c4e2f1f3e9d0e4f8f5fdffe4f9e6f1e4f5f4fdf9fef4f7e2ffe5e0bef3fffd">[email&#160;protected]</a></div><span class="u-rtag r-vd">Visual Designer</span></div></div><div class="perm-wrap"><span class="pt2">Approve</span><span class="pt2">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2">Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Designed</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">In Review</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(128,117,255,.12);color:var(--slate);">PC</div><div><div class="u-name">Paul</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="84d4e5f1e8c4f0ece1e9ebf0edf2e5f0e1e0e9edeae0e3f6ebf1f4aae7ebe9">[email&#160;protected]</a></div><span class="u-rtag r-vd">Creative Dir. / Visual</span></div></div><div class="perm-wrap"><span class="pt2">Approve</span><span class="pt2">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2">Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Created</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">In Review</div></div></div></div>
+  </div>
+</div>
+
+<!-- BOX TAB -->
+<div id="it-box" style="display:none;">
+  <div class="page-head"><div><div class="page-title">Box Storage — Live</div><div class="page-sub">HP-Content-Engine · 4 months · 20 categories · 100 stage folders</div></div><div class="hbtns"><a href="https://app.box.com/folder/374589121452" target="_blank"><button class="btn btn-pink">Open Root in Box ↗</button></a></div></div>
+  <div class="success-box"><span>✅</span><span><strong>100 folders confirmed live in Box</strong> — March, April, May 2026 + May 2025. Click any stage button to open that folder directly.</span></div>
+  <div style="font-size:9px;font-weight:700;color:var(--text-soft);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;">2026-03-March</div>
+  <div class="box-panel"><div class="bp-title"><div class="box-ic">B</div>March — All Categories</div>
+    <div class="box-cat"><div class="box-cat-name">Ink · Instant Ink · Tank</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374605514345" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374604606219" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374605540716" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374605518344" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374605979395" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Laptops · Desktops · PCs</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374603051147" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374604822961" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374604772062" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374603795957" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374602950968" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Printers · Scanners · MFP</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374606411798" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374606975294" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374606065462" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374606351287" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374606264644" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Monitors</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374607621068" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374606866868" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374605677257" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374605567086" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374605631561" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Accessories</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374607097601" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374605674356" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374605098219" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374606481322" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374606423874" target="_blank">05-Final</a></div></div>
+  </div>
+  <div style="font-size:9px;font-weight:700;color:var(--text-soft);letter-spacing:1.2px;text-transform:uppercase;margin:16px 0 10px;">2026-04-April</div>
+  <div class="box-panel"><div class="bp-title"><div class="box-ic">B</div>April — All Categories</div>
+    <div class="box-cat"><div class="box-cat-name">Ink · Instant Ink · Tank</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374600284092" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374603080762" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374602727145" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374603644738" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374603564671" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Laptops · Desktops · PCs</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374603776671" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374603521444" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374600163635" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374598222237" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374604032964" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Printers · Scanners · MFP</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374602221381" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374603288886" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374603649384" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374601851573" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374604478863" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Monitors</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374599525775" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374603778599" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374600032308" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374600068484" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374600233495" target="_blank">05-Final</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">Accessories</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374602655660" target="_blank">01-Draft</a><a class="bsb bsb2" href="https://app.box.com/folder/374598122307" target="_blank">02-Review</a><a class="bsb bsb3" href="https://app.box.com/folder/374602158523" target="_blank">03-Approved</a><a class="bsb bsb4" href="https://app.box.com/folder/374599381401" target="_blank">04-Client</a><a class="bsb bsb5" href="https://app.box.com/folder/374601849583" target="_blank">05-Final</a></div></div>
+  </div>
+  <div style="font-size:9px;font-weight:700;color:var(--text-soft);letter-spacing:1.2px;text-transform:uppercase;margin:16px 0 10px;">2026-05-May &amp; 2025-05-May (Archive)</div>
+  <div class="box-panel"><div class="bp-title"><div class="box-ic">B</div>May 2026 &amp; May 2025</div>
+    <div class="box-cat"><div class="box-cat-name">May 2026 — all categories</div><div class="box-stages"><a class="bsb bsb3" href="https://app.box.com/folder/374604474392" target="_blank">Open May 2026 ↗</a></div></div>
+    <div class="box-cat"><div class="box-cat-name">May 2025 — archive</div><div class="box-stages"><a class="bsb bsb1" href="https://app.box.com/folder/374587418151" target="_blank">Open May 2025 ↗</a></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+</div>
+
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false">
+var _d='themotivatedmindgroup.com';
+function _e(u){return u+'@'+_d;}
+var _u={
+  bill:{i:'BG',bg:'rgba(245,230,99,.25)',fg:'#7A6500',n:'Bill Gusmano',sb:'BG',canFlag:true},
+  jeff:{i:'JM',bg:'rgba(0,150,214,.15)',fg:'#0096D6',n:'Jeff',sb:'JM',canFlag:true},
+  bryan:{i:'BK',bg:'rgba(52,168,83,.15)',fg:'#1B5E20',n:'Bryan',sb:'BK',canFlag:true},
+  deni:{i:'DL',bg:'rgba(138,95,190,.15)',fg:'#8A5FBE',n:'Deni',sb:'DL',canFlag:true},
+  rob:{i:'RS',bg:'rgba(255,151,169,.2)',fg:'#F4607A',n:'Rob',sb:'RS',canFlag:true},
+  tracy:{i:'TW',bg:'rgba(188,244,245,.35)',fg:'#006064',n:'Tracy',sb:'TW',canFlag:false},
+  paul:{i:'PC',bg:'rgba(128,117,255,.15)',fg:'#8075FF',n:'Paul',sb:'PC',canFlag:false}
+};
+var USERS={};
+USERS['bill']=_u.bill; USERS[_e('bill.gusmano')]=_u.bill;
+USERS['jeff']=_u.jeff; USERS[_e('jeff')]=_u.jeff;
+USERS['bryan']=_u.bryan; USERS[_e('bryan')]=_u.bryan;
+USERS['deni']=_u.deni; USERS[_e('deni')]=_u.deni;
+USERS['rob']=_u.rob; USERS[_e('rob')]=_u.rob;
+USERS['tracy']=_u.tracy; USERS[_e('tracy')]=_u.tracy;
+USERS['paul']=_u.paul; USERS[_e('paul')]=_u.paul;
+var ASSETS=[
+  {id:1,icon:'🎬',title:'Shia — "NOT. GONNA. DO. IT."',cat:'Ink / Instant Ink',fmt:'GREEN SCREEN',bg:'linear-gradient(135deg,#FFE8ED,#FFC4D0)',up:3,dn:0,comments:[{a:'MMG Team',i:'MMG',bg:'rgba(255,151,169,.2)',fg:'#F4607A',t:'Love the Shia angle — super on trend with HP Instant Ink messaging.',ts:'Apr 2, 9:14am'}]},
+  {id:2,icon:'😤',title:'Off-brand ink ✕ / HP Instant Ink ✓',cat:'Ink Cartridges',fmt:'DRAKE FORMAT',bg:'linear-gradient(135deg,#FFE8ED,#FFCCD5)',up:4,dn:1,comments:[{a:'MMG Team',i:'MMG',bg:'rgba(255,151,169,.2)',fg:'#F4607A',t:'Classic Drake format — punchy and clear value prop.',ts:'Apr 2, 9:20am'}]}
+];
+var curUser=null;var flagCount=2;
+var MEME_FMTS=['Drake Approve/Disapprove','IYKYK','POV','Comparison Before/After','Nobody: / HP:','Green Screen Reaction','Couple Relatable','Distracted Boyfriend','Expanding Brain','Woman Yelling at Cat','Chad vs Virgin','Stonks'];
+var TT_FMTS=['Green Screen Celebrity','POV Lifestyle','Duet Trend','Day in the Life','Comparison Reveal','Transformation','Storytime Hook','Tutorial Twist'];
+var UP_BOX={'2026-03-March':{'Ink-InstantInk-Tank':'374605514345','Laptops-Desktops-PCs':'374603051147','Printers-Scanners-MFP':'374606411798','Monitors':'374607621068','Accessories':'374607097601'},'2026-04-April':{'Ink-InstantInk-Tank':'374600284092','Laptops-Desktops-PCs':'374603776671','Printers-Scanners-MFP':'374602221381','Monitors':'374599525775','Accessories':'374602655660'},'2026-05-May':{'Ink-InstantInk-Tank':'374606195907','Laptops-Desktops-PCs':'','Printers-Scanners-MFP':'','Monitors':'','Accessories':''},'2025-05-May':{'Ink-InstantInk-Tank':'374590983871','Laptops-Desktops-PCs':'374592210038','Printers-Scanners-MFP':'374591927364','Monitors':'374594182862','Accessories':'374591984867'}};
+var UP={month:'',monthId:'',cat:'',catLabel:'',type:'',fmt:'',file:null};
+
+
+function toggleAcc(id){
+  var body=document.getElementById('body-'+id);
+  var chev=document.getElementById('chev-'+id);
+  var month=document.getElementById('acc-'+id);
+  if(!body)return;
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  chev.classList.toggle('open',!open);
+  if(month)month.classList.toggle('active',!open);
+}
+function openBox(url){window.open(url,'_blank');}
+
+
+
+// ── BOX API INTEGRATION ────────────────────────────────────────────────────
+
+var BOX_ASSETS = {};  // Cache of loaded assets by month
+var CURRENT_MONTH = '2026-04-April';
+
+
+
+
+
+// Approve an asset via Box API
+async function boxApprove(fileId, category, month, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Moving...';
+  try {
+    var res = await fetch('/.netlify/functions/box-move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: fileId, action: 'approve', category: category, month: month })
+    });
+    var data = await res.json();
+    if (data.success) {
+      btn.classList.add('on');
+      btn.textContent = '✓ Approved';
+      btn.disabled = false;
+      var card = btn.closest('.ab');
+      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+      logActivity('act-approve', title, 'Moved to 03-Approved-Internal in Box', category);
+    } else {
+      btn.textContent = 'Error — retry';
+      btn.disabled = false;
+    }
+  } catch(err) {
+    btn.textContent = 'Error — retry';
+    btn.disabled = false;
+    console.error('Approve error:', err);
+  }
+}
+
+// Reject an asset via Box API  
+async function boxReject(fileId, category, month, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Moving...';
+  try {
+    var res = await fetch('/.netlify/functions/box-move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: fileId, action: 'reject', category: category, month: month })
+    });
+    var data = await res.json();
+    if (data.success) {
+      btn.textContent = '✕ Rejected';
+      btn.style.background = 'rgba(229,57,53,.15)';
+      btn.style.color = 'var(--s-reject)';
+      btn.disabled = false;
+      var card = btn.closest('.ab');
+      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+      logActivity('act-reject', title, 'Returned to 02-MMG-Review in Box', category);
+    } else {
+      btn.textContent = 'Error — retry';
+      btn.disabled = false;
+    }
+  } catch(err) {
+    btn.textContent = 'Error — retry';
+    btn.disabled = false;
+  }
+}
+
+// Flag for HP via Box API
+async function boxFlag(fileId, category, month, btn) {
+  if (btn.classList.contains('xb-locked')) return;
+  btn.disabled = true;
+  try {
+    var res = await fetch('/.netlify/functions/box-move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: fileId, action: 'flag', category: category, month: month })
+    });
+    var data = await res.json();
+    if (data.success) {
+      btn.classList.add('flagged');
+      btn.textContent = '⚑ Flagged for HP';
+      flagCount++;
+      document.getElementById('flag-count').textContent = flagCount;
+      var card = btn.closest('.ab');
+      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+      logActivity('act-flag', title, 'Moved to 04-Client-Feedback in Box', category);
+    }
+    btn.disabled = false;
+  } catch(err) {
+    btn.disabled = false;
+  }
+}
+
+
+
+
+
+
+// ── BOX DIRECT API ────────────────────────────────────────────────────────
+var BOX_TOKEN = null;
+var BOX_ASSETS_CACHE = {};
+
+// All April 2026 folder IDs
+var BOX_FOLDERS = {
+  '2026-04-April': {
+    'Ink-InstantInk-Tank':   {draft:'374600284092', review:'374603080762', approved:'374602727145', client:'374603644738', final:'374603564671'},
+    'Laptops-Desktops-PCs':  {draft:'374603776671', review:'374603521444', approved:'374600163635', client:'374598222237', final:'374604032964'},
+    'Printers-Scanners-MFP': {draft:'374602221381', review:'374603288886', approved:'374603649384', client:'374601851573', final:'374604478863'},
+    'Monitors':              {draft:'374599525775', review:'374603778599', approved:'374600032308', client:'374600068484', final:'374600233495'},
+    'Accessories':           {draft:'374602655660', review:'374598122307', approved:'374602158523', client:'374599381401', final:'374601849583'}
+  }
+};
+
+var STAGE_LABELS = {draft:'01-AI-Draft', review:'02-MMG-Review', approved:'03-Approved', client:'04-Client-Feedback', final:'05-FINAL'};
+
+function boxFetch(path, opts) {
+  if (!BOX_TOKEN) return Promise.reject(new Error('No Box token'));
+  var options = opts || {};
+  options.headers = Object.assign({'Authorization': 'Bearer ' + BOX_TOKEN, 'Content-Type': 'application/json'}, options.headers || {});
+  return fetch('https://api.box.com/2.0' + path, options).then(function(r) {
+    if (!r.ok) throw new Error('Box API ' + r.status);
+    return r.json();
+  });
+}
+
+function connectBox() {
+  var token = document.getElementById('box-token-input').value.trim();
+  if (!token) return;
+  var btn = document.querySelector('.box-connect-btn');
+  btn.textContent = 'Connecting...';
+  btn.disabled = true;
+  // Verify token works
+  fetch('https://api.box.com/2.0/users/me', {
+    headers: {'Authorization': 'Bearer ' + token}
+  }).then(function(r) {
+    if (!r.ok) throw new Error('invalid');
+    return r.json();
+  }).then(function(user) {
+    BOX_TOKEN = token;
+    sessionStorage.setItem('box_token', token);
+    document.getElementById('box-modal').style.display = 'none';
+    updateBoxStatus(true, user.name);
+    loadAllBoxAssets();
+    loadBoxActivity();
+    btn.textContent = 'Connect to Box ↗';
+    btn.disabled = false;
+  }).catch(function() {
+    document.getElementById('box-connect-err').style.display = 'block';
+    btn.textContent = 'Connect to Box ↗';
+    btn.disabled = false;
+  });
+}
+
+function skipBox() {
+  document.getElementById('box-modal').style.display = 'none';
+  updateBoxStatus(false);
+}
+
+function updateBoxStatus(connected, userName) {
+  var el = document.getElementById('box-status');
+  if (!el) return;
+  if (connected) {
+    el.textContent = '⬤ Box Live';
+    el.style.background = 'rgba(52,168,83,.15)';
+    el.style.color = '#1B5E20';
+  } else {
+    el.textContent = '⬤ Box Offline';
+    el.style.background = 'rgba(229,57,53,.1)';
+    el.style.color = 'var(--s-reject)';
+  }
+}
+
+// Load all real assets from Box for April 2026
+async function loadAllBoxAssets() {
+  var month = '2026-04-April';
+  var cats = Object.keys(BOX_FOLDERS[month]);
+  var allAssets = [];
+
+  for (var cat of cats) {
+    var stages = BOX_FOLDERS[month][cat];
+    for (var stageKey of Object.keys(stages)) {
+      var folderId = stages[stageKey];
+      if (!folderId) continue;
+      try {
+        var data = await boxFetch('/folders/' + folderId + '/items?fields=id,name,type,size,modified_at&limit=50');
+        for (var item of (data.entries || [])) {
+          if (item.type !== 'file') continue;
+          var isScript = item.name.toLowerCase().endsWith('.txt');
+          if (isScript) continue; // skip scripts, show concept cards only
+          allAssets.push({
+            id: item.id,
+            name: item.name,
+            category: cat,
+            stageKey: stageKey,
+            stageLabel: STAGE_LABELS[stageKey],
+            folderId: folderId,
+            modified: item.modified_at,
+            isTikTok: item.name.toLowerCase().includes('tiktok')
+          });
+        }
+      } catch(e) {}
+    }
+  }
+
+  BOX_ASSETS_CACHE[month] = allAssets;
+  renderBoxAssets(month);
+}
+
+// Load real Box thumbnails for an asset card
+function loadThumb(fileId, containerId) {
+  if (!BOX_TOKEN) return;
+  fetch('https://api.box.com/2.0/files/' + fileId + '/thumbnail.jpg?min_height=400&min_width=400', {
+    headers: {'Authorization': 'Bearer ' + BOX_TOKEN}
+  }).then(function(r) {
+    if (!r.ok) throw new Error('no thumb');
+    return r.blob();
+  }).then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var el = document.getElementById(containerId);
+    if (el) {
+      el.innerHTML = '<img class="thumb-img" src="' + url + '" alt="Asset preview">';
+    }
+  }).catch(function() {
+    // Keep placeholder
+  });
+}
+
+
+
+// Box approve/reject/flag
+async function boxMove(fileId, action, category, month, btn) {
+  if (!BOX_TOKEN) {
+    showBoxSetup();
+    return;
+  }
+  month = month || '2026-04-April';
+  var stages = BOX_FOLDERS[month][category];
+  if (!stages) return;
+
+  var stageKey = {approve:'approved', reject:'review', flag:'client', final:'final'}[action];
+  var targetFolder = stages[stageKey];
+  if (!targetFolder) return;
+
+  var origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Moving...';
+
+  try {
+    await fetch('https://api.box.com/2.0/files/' + fileId, {
+      method: 'PUT',
+      headers: {'Authorization': 'Bearer ' + BOX_TOKEN, 'Content-Type': 'application/json'},
+      body: JSON.stringify({parent: {id: targetFolder}})
+    });
+
+    // Write activity comment
+    var labels = {approve:'✓ Approved — moved to 03-Approved-Internal', reject:'✕ Rejected — returned to 02-MMG-Review', flag:'⚑ Flagged for HP — moved to 04-Client-Feedback'};
+    var now = new Date().toLocaleString('en-US', {month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+    await fetch('https://api.box.com/2.0/comments', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + BOX_TOKEN, 'Content-Type': 'application/json'},
+      body: JSON.stringify({message: labels[action] + ' · ' + now + ' · Category: ' + category + ' · Batch: ' + month, item: {id: fileId, type: 'file'}})
+    });
+
+    btn.disabled = false;
+    if (action === 'approve') { btn.classList.add('on'); btn.textContent = '✓ Approved'; }
+    else if (action === 'reject') { btn.textContent = origText; }
+    else if (action === 'flag') { btn.classList.add('flagged'); btn.textContent = '⚑ Flagged for HP'; flagCount++; document.getElementById('flag-count').textContent = flagCount; }
+
+    var card = btn.closest('.ab');
+    var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+    logActivity('act-' + (action === 'flag' ? 'flag' : action === 'approve' ? 'approve' : 'reject'), title, 'Moved in Box — ' + labels[action], category);
+
+    // Refresh asset counts
+    loadAllBoxAssets();
+
+  } catch(e) {
+    btn.textContent = 'Error — retry';
+    btn.disabled = false;
+  }
+}
+
+// Load real Box activity log
+async function loadBoxActivity() {
+  if (!BOX_TOKEN) return;
+  var month = '2026-04-April';
+  var cats = Object.keys(BOX_FOLDERS[month]);
+
+  for (var cat of cats) {
+    var stages = BOX_FOLDERS[month][cat];
+    for (var folderId of Object.values(stages)) {
+      if (!folderId) continue;
+      try {
+        var data = await boxFetch('/folders/' + folderId + '/items?fields=id,name,type&limit=20');
+        for (var item of (data.entries || [])) {
+          if (item.type !== 'file') continue;
+          var comments = await boxFetch('/files/' + item.id + '/comments?fields=id,message,created_at,created_by&limit=20');
+          for (var c of (comments.entries || [])) {
+            var type = 'act-upload';
+            if (c.message.includes('✓ Approved')) type = 'act-approve';
+            else if (c.message.includes('✕ Rejected')) type = 'act-reject';
+            else if (c.message.includes('⚑ Flagged')) type = 'act-flag';
+            var dt = new Date(c.created_at);
+            var entry = {
+              id: c.id,
+              type: type,
+              title: c.message.split('·')[0].trim(),
+              asset: item.name,
+              category: cat,
+              time: dt.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true}),
+              date: dt.toLocaleDateString('en-US', {month:'short',day:'numeric'}),
+              full: dt.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + ' · ' + dt.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true}),
+              by: c.created_by ? c.created_by.name : 'System'
+            };
+            if (!ACTIVITY.find(function(a){ return a.id === entry.id; })) {
+              ACTIVITY.push(entry);
+            }
+          }
+        }
+      } catch(e) {}
+    }
+  }
+  ACTIVITY.sort(function(a,b){ return new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time); });
+  renderActivity();
+  var badge = document.getElementById('activity-count');
+  if (badge) badge.textContent = ACTIVITY.length;
+}
+
+// Upload file directly to Box
+async function upDoBoxUpload(file, month, category, filename, btn) {
+  if (!BOX_TOKEN) { showBoxSetup(); return null; }
+  btn.disabled = true;
+  btn.textContent = 'Uploading to Box...';
+
+  var folderId = (BOX_FOLDERS[month] || {})[category];
+  folderId = folderId ? folderId.draft : null;
+  if (!folderId) { btn.textContent = 'No folder — retry'; btn.disabled = false; return null; }
+
+  try {
+    var formData = new FormData();
+    formData.append('attributes', JSON.stringify({name: filename, parent: {id: folderId}}));
+    formData.append('file', file, filename);
+
+    var res = await fetch('https://upload.box.com/api/2.0/files/content', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + BOX_TOKEN},
+      body: formData
+    });
+
+    if (!res.ok) throw new Error('Upload failed: ' + res.status);
+    var data = await res.json();
+    var uploadedFile = data.entries && data.entries[0];
+
+    if (uploadedFile) {
+      var now = new Date().toLocaleString('en-US', {month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+      await fetch('https://api.box.com/2.0/comments', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + BOX_TOKEN, 'Content-Type': 'application/json'},
+        body: JSON.stringify({message: '📥 Asset uploaded to 01-AI-Draft · ' + now + ' · Category: ' + category + ' · Batch: ' + month + ' · File: ' + filename, item: {id: uploadedFile.id, type: 'file'}})
+      });
+    }
+
+    btn.textContent = '✓ Uploaded to Box';
+    btn.style.background = 'rgba(52,168,83,.15)';
+    btn.style.color = 'var(--s-approve)';
+    logActivity('act-upload', filename, 'Uploaded to Box 01-AI-Draft · ' + category, month);
+    return uploadedFile;
+  } catch(e) {
+    btn.textContent = 'Upload failed — retry';
+    btn.disabled = false;
+    return null;
+  }
+}
+
+function showBoxSetup() {
+  document.getElementById('box-modal').style.display = 'flex';
+}
+
+// ── ACTIVITY LOG ────────────────────────────────────────────────────────────
+var ACTIVITY = [];
+var actFilter = 'all';
+
+function logActivity(type, title, asset, category) {
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+  var dateStr = now.toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  var entry = {
+    id: Date.now(),
+    type: type,        // act-approve, act-reject, act-flag, act-upload
+    title: title,
+    asset: asset || '',
+    category: category || '',
+    time: timeStr,
+    date: dateStr,
+    full: dateStr + ' · ' + timeStr
+  };
+  ACTIVITY.unshift(entry);
+  renderActivity();
+  // Update badge count
+  var badge = document.getElementById('activity-count');
+  if(badge) badge.textContent = ACTIVITY.length;
+}
+
+function renderActivity() {
+  var feed = document.getElementById('act-feed');
+  var empty = document.getElementById('act-empty');
+  if(!feed) return;
+
+  var filtered = actFilter === 'all' ? ACTIVITY : ACTIVITY.filter(function(a){ return a.type === actFilter; });
+
+  if(filtered.length === 0) {
+    if(empty) empty.style.display = 'block';
+    var existing = feed.querySelectorAll('.act-item');
+    existing.forEach(function(el){ el.remove(); });
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+
+  // Remove existing items
+  var existing = feed.querySelectorAll('.act-item');
+  existing.forEach(function(el){ el.remove(); });
+
+  var icons = {
+    'act-approve': {icon:'✓', bg:'rgba(52,168,83,.12)', label:'Approved'},
+    'act-reject':  {icon:'✕', bg:'rgba(229,57,53,.1)',  label:'Rejected'},
+    'act-flag':    {icon:'⚑', bg:'rgba(255,151,169,.15)', label:'Flagged for HP'},
+    'act-upload':  {icon:'↑', bg:'rgba(0,150,214,.12)', label:'Uploaded'}
+  };
+
+  filtered.forEach(function(entry) {
+    var ic = icons[entry.type] || {icon:'•', bg:'var(--warm-gray)', label:'Action'};
+    var div = document.createElement('div');
+    div.className = 'act-item ' + entry.type;
+    div.innerHTML =
+      '<div class="act-icon" style="background:' + ic.bg + ';">' + ic.icon + '</div>' +
+      '<div class="act-body">' +
+        '<div class="act-title">' + ic.label + ': ' + entry.title + '</div>' +
+        '<div class="act-meta">' + (entry.category ? entry.category + ' · ' : '') + entry.asset + '</div>' +
+      '</div>' +
+      '<div class="act-time">' + entry.full + '</div>';
+    feed.appendChild(div);
+  });
+}
+
+function filterActivity(type, el) {
+  actFilter = type;
+  document.querySelectorAll('.act-chip').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on');
+  renderActivity();
+}
+
+function clearActivity() {
+  ACTIVITY = [];
+  var badge = document.getElementById('activity-count');
+  if(badge) badge.textContent = '0';
+  renderActivity();
+}
+
+
+function logout(){
+  document.getElementById('iv').style.display='none';
+  document.getElementById('ls').style.display='flex';
+  document.getElementById('ie').value='';
+  document.getElementById('ip').value='';
+  curUser=null;
+  BOX_ASSETS={};
+  ACTIVITY=[];
+  var badge=document.getElementById('activity-count');
+  if(badge)badge.textContent='0';
+  var status=document.getElementById('box-status');
+  if(status){status.textContent='⬤ Box Connected';status.style.color='#1B5E20';}
+}
+
+function swTab(t,el){document.querySelectorAll('.l-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('pi').style.display=t==='int'?'block':'none';document.getElementById('pc').style.display=t==='cli'?'block':'none';}
+function doLogin(){var raw=document.getElementById('ie').value.trim().toLowerCase();var em=raw.includes('@')?raw:raw.replace(/[^a-z]/g,'');var pw=document.getElementById('ip').value.trim();var err=document.getElementById('ei');if(pw!=='hp2025'||!USERS[em]){err.style.display='block';return;}err.style.display='none';curUser=USERS[em];document.getElementById('ls').style.display='none';document.getElementById('iv').style.display='block';var av=document.getElementById('iav');av.textContent=curUser.i;av.style.background=curUser.bg;av.style.color=curUser.fg;var sb=document.getElementById('sb-'+curUser.sb);if(sb)sb.classList.add('me');
+  // Check for existing session token, otherwise show Box setup
+  var savedToken = sessionStorage.getItem('box_token');
+  if (savedToken) {
+    BOX_TOKEN = savedToken;
+    updateBoxStatus(true);
+    setTimeout(function(){ loadAllBoxAssets(); loadBoxActivity(); }, 300);
+  } else {
+    setTimeout(function(){ document.getElementById('box-modal').style.display = 'flex'; }, 400);
+  }if(!curUser.canFlag){document.querySelectorAll('.xb-fl[data-can="true"]').forEach(b=>{b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
+
+function toggleFlag(btn,id){
+  if(btn.classList.contains('xb-locked'))return;
+  btn.classList.toggle('flagged');
+  var flagged = btn.classList.contains('flagged');
+  if(flagged){btn.textContent='⚑ Flagged for HP';flagCount++;}
+  else{btn.textContent='⚑ Flag for HP';flagCount=Math.max(0,flagCount-1);}
+  document.getElementById('flag-count').textContent=flagCount;
+  var card = btn.closest('.ab');
+  var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+  var cat = card ? (card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '') : '';
+  if(flagged) logActivity('act-flag', title, 'Ready for HP review', cat);
+}
+function approveAll(){
+  document.querySelectorAll('.xb-ok').forEach(function(b){
+    if(!b.classList.contains('on')){
+      b.classList.add('on');
+      b.textContent='✓ Approved';
+      var card = b.closest('.ab');
+      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
+      var cat = card ? (card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '') : '';
+      logActivity('act-approve', title, '', cat);
+    }
+  });
+}
+
+// UPLOAD
+function upSelMonth(m,id,el){document.querySelectorAll('#ups1 .m-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');UP.month=m;UP.monthId=id;document.getElementById('upnext1').disabled=false;}
+function upSelCat(c,l,el){document.querySelectorAll('.cat-card').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');UP.cat=c;UP.catLabel=l;document.getElementById('upnext2').disabled=false;}
+function upSelType(t,el){document.querySelectorAll('.type-card').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');UP.type=t;UP.fmt='';var tn=document.getElementById('tiktok-note');if(tn)tn.style.display=t==='TikTok'?'block':'none';var fmts=t==='Meme'?MEME_FMTS:TT_FMTS;var sel=document.getElementById('up-fmt-sel');sel.innerHTML='<option value="">— select format —</option>'+fmts.map(f=>'<option value="'+f+'">'+f+'</option>').join('');document.getElementById('up-fmt-wrap').style.display='block';document.getElementById('upnext3').disabled=true;}
+function upFmtChange(){UP.fmt=document.getElementById('up-fmt-sel').value;document.getElementById('upnext3').disabled=!UP.fmt;}
+function upGetFname(){if(!UP.type||!UP.cat)return '—';var s=UP.cat.replace(/-/g,'').substring(0,18);var e=UP.type==='Meme'?'jpg':'mp4';return UP.type+'_'+s+'_001_Draft.'+e;}
+function upGetBoxUrl(){var ids=(UP_BOX[UP.month]||{});var did=ids[UP.cat]||'';return did?'https://app.box.com/folder/'+did:'https://app.box.com/folder/374589121452';}
+function upOpenBox(){window.open(upGetBoxUrl(),'_blank');}
+function upStep(n){[1,2,3,4].forEach(function(i){document.getElementById('ups'+i).style.display=i===n?'block':'none';var dot=document.getElementById('upd'+i),lbl=document.getElementById('upl'+i);if(i<n){dot.classList.add('done');dot.classList.remove('active');dot.textContent='✓';lbl.classList.remove('active');}else if(i===n){dot.classList.add('active');dot.classList.remove('done');dot.textContent=i;lbl.classList.add('active');}else{dot.classList.remove('active','done');dot.textContent=i;lbl.classList.remove('active');}var line=document.getElementById('upline'+i);if(line)line.classList.toggle('done',i<n);});document.getElementById('ups-success').style.display='none';if(n===4){document.getElementById('ups-month').textContent=UP.month;document.getElementById('ups-cat').textContent=UP.catLabel;document.getElementById('ups-type').textContent=UP.type;document.getElementById('ups-fname').textContent=upGetFname();document.getElementById('ups-path').textContent='HP-Content-Engine / '+UP.month+' / '+UP.cat+' / 01-AI-Draft';}}
+function upHandleDrop(e){e.preventDefault();document.getElementById('up-dropzone').classList.remove('drag');var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)upHandleFile(f);}
+function upHandleFile(f){UP.file=f;var dz=document.getElementById('up-dropzone');dz.classList.add('has-file');document.getElementById('up-dz-icon').textContent='✅';document.getElementById('up-dz-main').textContent=f.name;document.getElementById('up-dz-sub').textContent=(f.size/1024/1024).toFixed(1)+' MB';document.getElementById('up-final-btn').disabled=false;}
+function upDoUpload(){
+  var btn = document.getElementById('up-final-btn');
+  if (UP.file && UP.month && UP.cat) {
+    upDoBoxUpload(UP.file, UP.month, UP.cat, upGetFname(), btn).then(function(result){
+      document.getElementById('ups4').style.display='none';
+      document.getElementById('ups-success').style.display='block';
+      document.getElementById('ups-success-msg').innerHTML = result
+        ? 'File uploaded to Box: <strong>' + UP.month + ' / ' + UP.cat + ' / 01-AI-Draft</strong><br>Filename: <strong>' + upGetFname() + '</strong>'
+        : 'Box upload failed. Please drop the file manually in Box.';
+      if (!result) upOpenBox();
+    });
+    return;
+  }
+  logActivity('act-upload', upGetFname(), UP.catLabel, UP.month);
+  document.getElementById('ups4').style.display='none';document.getElementById('ups-success').style.display='block';document.getElementById('ups-success-msg').innerHTML='Box is open at: <strong>'+UP.month+' / '+UP.cat+' / 01-AI-Draft</strong>.<br>Rename your file to <strong>'+upGetFname()+'</strong> then drop it in.';upOpenBox();}
+function upReset(){UP={month:'',monthId:'',cat:'',catLabel:'',type:'',fmt:'',file:null};document.getElementById('ups-success').style.display='none';document.querySelectorAll('.m-card,.cat-card,.type-card').forEach(c=>c.classList.remove('sel'));document.getElementById('up-dropzone').classList.remove('has-file');document.getElementById('up-dz-icon').textContent='📁';document.getElementById('up-dz-main').textContent='Drop your file here or click to browse';document.getElementById('up-dz-sub').textContent='JPG, PNG, MP4, TXT · Max 500MB';document.getElementById('up-fmt-wrap').style.display='none';document.getElementById('upnext1').disabled=true;document.getElementById('upnext2').disabled=true;document.getElementById('upnext3').disabled=true;document.getElementById('up-final-btn').disabled=true;upStep(1);}
+</script>
+</body>
+</html>
