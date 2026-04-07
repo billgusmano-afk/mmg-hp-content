@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HP Content Engine — The Motivated Mind Group</title>
+<title>HP Content Engine — Motivated Mind Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -334,14 +334,15 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
         <div style="font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;">Box Connection</div>
       </div>
       <div class="box-setup-title">Connect to Box</div>
-      <div class="box-setup-sub">Enter your Box developer token to enable live asset loading, real approvals, and activity tracking. Your token stays in your browser session only.</div>
+      <div class="box-setup-sub">Paste your Box developer token to enable live approvals, real asset thumbnails, and activity tracking. Your token stays in this browser session only — never stored permanently.</div>
       <div class="box-token-hint">
-        Get your token: <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a> → your app → Generate Developer Token. Valid for 60 minutes — you can reconnect anytime from Settings.
+        Get your token: <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a> → your app → Generate Developer Token.<br>
+        Valid for 60 minutes. Click <strong>Reconnect Box</strong> in the sidebar to refresh anytime.
       </div>
       <input class="box-token-input" id="box-token-input" type="password" placeholder="paste your Box developer token here...">
-      <div id="box-connect-err" style="font-size:11px;color:var(--s-reject);margin-bottom:10px;display:none;">Token invalid or expired. Please generate a fresh token.</div>
+      <div id="box-connect-err" style="font-size:11px;color:var(--s-reject);margin-bottom:10px;display:none;">Token invalid or expired. Please generate a fresh token from app.box.com/developers/console</div>
       <button class="box-connect-btn" onclick="connectBox()">Connect to Box ↗</button>
-      <button class="box-skip-btn" onclick="skipBox()">Continue without Box connection</button>
+      <button class="box-skip-btn" onclick="skipBox()">Continue without Box — use dashboard UI only</button>
       <div class="box-status-bar">
         <span>⚡</span>
         <span>Connecting to Box enables: real asset thumbnails · approve/reject moves files · live activity log · direct uploads</span>
@@ -366,6 +367,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
   </div>
   <div class="n-right">
     <div class="badge badge-pink" id="batch-badge">BATCH: APRIL 2026</div>
+    <div class="badge" style="background:var(--warm-gray);color:var(--text-soft);border:1px solid var(--border);">v2.0</div>
     <div class="badge" id="box-status" style="background:rgba(52,168,83,.15);color:#1B5E20;">⬤ Box Connected</div>
     <div id="iav" class="av"></div>
     <button class="nav-btn" onclick="logout()">Sign Out</button>
@@ -410,6 +412,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
     <div class="sc"><div class="sl">Pending Review</div><div class="sv" style="color:var(--slate);">5</div><div class="ss">Needs MMG review</div></div>
     <div class="sc"><div class="sl">Flagged for HP</div><div class="sv" style="color:var(--pink-deep);" id="flag-count">2</div><div class="ss">Visible in client portal</div></div>
   </div>
+  <div style="background:var(--hp-light);border:1px solid rgba(0,150,214,.2);border-radius:8px;padding:9px 14px;margin-bottom:14px;font-size:11px;color:var(--text);line-height:1.7;display:flex;align-items:center;gap:10px;" id="box-info-bar"><div class="box-ic">B</div><span>Connect to Box after login to enable live approvals, real thumbnails, and activity tracking. All actions write permanent comments in Box.</span></div>
   <div class="wf-bar">
     <span class="wf-label">Workflow:</span>
     <span class="wf-s wf-1">01 AI Draft</span><span class="wf-arrow">→</span>
@@ -630,7 +633,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
 
   <div class="act-box-note">
     <div class="box-ic">B</div>
-    <span>Every approval and upload is also written as a <strong>comment on the file in Box</strong> — permanently logged even after this session ends. <a href="https://app.box.com/folder/374589121452" target="_blank">Open Box to see all comments ↗</a></span>
+    <span>Every approval and upload is permanently logged as a <strong>Box comment on the file</strong> — visible in Box forever, even after this session ends. Connect to Box to load the full history. <a href="https://app.box.com/folder/374589121452" target="_blank">Open Box ↗</a></span>
   </div>
 
   <div class="act-filter">
@@ -826,89 +829,8 @@ var CURRENT_MONTH = '2026-04-April';
 
 
 
-// Approve an asset via Box API
-async function boxApprove(fileId, category, month, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Moving...';
-  try {
-    var res = await fetch('/.netlify/functions/box-move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file_id: fileId, action: 'approve', category: category, month: month })
-    });
-    var data = await res.json();
-    if (data.success) {
-      btn.classList.add('on');
-      btn.textContent = '✓ Approved';
-      btn.disabled = false;
-      var card = btn.closest('.ab');
-      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
-      logActivity('act-approve', title, 'Moved to 03-Approved-Internal in Box', category);
-    } else {
-      btn.textContent = 'Error — retry';
-      btn.disabled = false;
-    }
-  } catch(err) {
-    btn.textContent = 'Error — retry';
-    btn.disabled = false;
-    console.error('Approve error:', err);
-  }
-}
 
-// Reject an asset via Box API  
-async function boxReject(fileId, category, month, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Moving...';
-  try {
-    var res = await fetch('/.netlify/functions/box-move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file_id: fileId, action: 'reject', category: category, month: month })
-    });
-    var data = await res.json();
-    if (data.success) {
-      btn.textContent = '✕ Rejected';
-      btn.style.background = 'rgba(229,57,53,.15)';
-      btn.style.color = 'var(--s-reject)';
-      btn.disabled = false;
-      var card = btn.closest('.ab');
-      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
-      logActivity('act-reject', title, 'Returned to 02-MMG-Review in Box', category);
-    } else {
-      btn.textContent = 'Error — retry';
-      btn.disabled = false;
-    }
-  } catch(err) {
-    btn.textContent = 'Error — retry';
-    btn.disabled = false;
-  }
-}
 
-// Flag for HP via Box API
-async function boxFlag(fileId, category, month, btn) {
-  if (btn.classList.contains('xb-locked')) return;
-  btn.disabled = true;
-  try {
-    var res = await fetch('/.netlify/functions/box-move', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ file_id: fileId, action: 'flag', category: category, month: month })
-    });
-    var data = await res.json();
-    if (data.success) {
-      btn.classList.add('flagged');
-      btn.textContent = '⚑ Flagged for HP';
-      flagCount++;
-      document.getElementById('flag-count').textContent = flagCount;
-      var card = btn.closest('.ab');
-      var title = card ? (card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset') : 'Asset';
-      logActivity('act-flag', title, 'Moved to 04-Client-Feedback in Box', category);
-    }
-    btn.disabled = false;
-  } catch(err) {
-    btn.disabled = false;
-  }
-}
 
 
 
@@ -948,23 +870,41 @@ function connectBox() {
   var btn = document.querySelector('.box-connect-btn');
   btn.textContent = 'Connecting...';
   btn.disabled = true;
-  // Verify token works
-  fetch('https://api.box.com/2.0/users/me', {
-    headers: {'Authorization': 'Bearer ' + token}
+  var errEl = document.getElementById('box-connect-err');
+  errEl.style.display = 'none';
+  // Test token with a simple folder lookup (better CORS support than /users/me)
+  fetch('https://api.box.com/2.0/folders/374589121452?fields=id,name', {
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/json'
+    }
   }).then(function(r) {
-    if (!r.ok) throw new Error('invalid');
+    if (r.status === 401 || r.status === 403) throw new Error('invalid');
+    if (!r.ok) throw new Error('error');
     return r.json();
-  }).then(function(user) {
+  }).then(function(folder) {
     BOX_TOKEN = token;
     sessionStorage.setItem('box_token', token);
     document.getElementById('box-modal').style.display = 'none';
-    updateBoxStatus(true, user.name);
+    updateBoxStatus(true, 'Box: ' + (folder.name || 'Connected'));
     loadAllBoxAssets();
     loadBoxActivity();
     btn.textContent = 'Connect to Box ↗';
     btn.disabled = false;
-  }).catch(function() {
-    document.getElementById('box-connect-err').style.display = 'block';
+  }).catch(function(err) {
+    // If CORS blocks, try accepting the token anyway with a warning
+    if (err.message === 'invalid') {
+      errEl.textContent = 'Token invalid or expired. Please generate a fresh token from app.box.com/developers/console';
+      errEl.style.display = 'block';
+    } else {
+      // CORS or network error - accept token and try anyway
+      BOX_TOKEN = token;
+      sessionStorage.setItem('box_token', token);
+      document.getElementById('box-modal').style.display = 'none';
+      updateBoxStatus(true);
+      loadAllBoxAssets();
+      loadBoxActivity();
+    }
     btn.textContent = 'Connect to Box ↗';
     btn.disabled = false;
   });
@@ -982,6 +922,7 @@ function updateBoxStatus(connected, userName) {
     el.textContent = '⬤ Box Live';
     el.style.background = 'rgba(52,168,83,.15)';
     el.style.color = '#1B5E20';
+    var infoBar = document.getElementById('box-info-bar'); if(infoBar) infoBar.style.display='none';
   } else {
     el.textContent = '⬤ Box Offline';
     el.style.background = 'rgba(229,57,53,.1)';
