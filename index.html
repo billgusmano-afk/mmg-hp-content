@@ -325,31 +325,25 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
 </div>
 
 
-<!-- BOX SETUP MODAL -->
+<!-- BOX OAUTH MODAL -->
 <div id="box-modal" style="display:none;">
   <div class="box-setup">
     <div class="box-setup-card">
       <div class="box-setup-logo">
         <div class="box-ic" style="width:24px;height:24px;font-size:14px;">B</div>
-        <div style="font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;">Box Connection</div>
+        <div style="font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;">Connect to Box</div>
       </div>
-      <div class="box-setup-title">Connect to Box</div>
-      <div class="box-setup-sub">Paste your Box developer token to enable live approvals, real asset thumbnails, and activity tracking. Your token stays in this browser session only — never stored permanently.</div>
-      <div class="box-token-hint">
-        <strong>Step 1</strong> — Go to <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a><br>
-        <strong>Step 2</strong> — Click <strong>HP content engine</strong> (the OAuth 2.0 app)<br>
-        <strong>Step 3</strong> — Click the <strong>Configuration</strong> tab<br>
-        <strong>Step 4</strong> — Scroll to <strong>Developer Token</strong> → click <strong>Generate Developer Token</strong><br>
-        <strong>Step 5</strong> — Copy the full token and paste it below immediately<br><br>
-        Token expires after 60 minutes. Use <strong>Reconnect Box</strong> in the sidebar to refresh.
-      </div>
-      <input class="box-token-input" id="box-token-input" type="password" placeholder="paste your Box developer token here...">
-      <div id="box-connect-err" style="font-size:11px;color:var(--s-reject);margin-bottom:10px;display:none;">Token invalid or expired. Please generate a fresh token from app.box.com/developers/console</div>
-      <button class="box-connect-btn" onclick="connectBox()">Connect to Box</button>
-      <button class="box-skip-btn" onclick="skipBox()">Continue without Box — use dashboard UI only</button>
+      <div class="box-setup-title">Sign in with your Box account</div>
+      <div class="box-setup-sub">Click below to sign in with your existing MMG Box account. You only need to do this once — you'll stay connected automatically.</div>
+      <button class="box-login-btn" onclick="startBoxOAuth()">
+        <div class="box-login-icon">B</div>
+        Login with Box
+      </button>
+      <div id="box-oauth-status" class="box-login-status"></div>
+      <button class="box-skip-btn" onclick="skipBox()">Continue without Box — review only</button>
       <div class="box-status-bar">
-        <span>⚡</span>
-        <span>Connecting to Box enables: real asset thumbnails · approve/reject moves files · live activity log · direct uploads</span>
+        <span>🔒</span>
+        <span>Uses your existing MMG Box account. No tokens, no expiry — sign in once and stay connected.</span>
       </div>
     </div>
   </div>
@@ -407,7 +401,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
 <!-- REVIEW TAB -->
 <div id="it-review">
   <div class="page-head">
-    <div><div class="page-title">Content Batches</div><div class="page-sub">Review and approve assets before sending to HP · <strong style="color:var(--pink-deep);">Bill has final approval</strong></div></div>
+    <div><div class="page-title">Content Batches</div><div class="page-sub">Review and approve assets before sending to HP · <strong style="color:var(--pink-deep);">Jeff has final approval</strong></div></div>
     <div class="hbtns"><button class="btn btn-ghost">↻ Regenerate All</button><button class="btn btn-pink" onclick="approveAll()">Approve All ✓</button></div>
   </div>
   <div class="stats">
@@ -424,7 +418,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
     <span class="wf-s wf-3">03 Approved</span><span class="wf-arrow">→</span>
     <span class="wf-s wf-4">04 Client Feedback</span><span class="wf-arrow">→</span>
     <span class="wf-s wf-5">05 FINAL</span>
-    <span class="wf-note">· Bill has final approval · Only Bill, Jeff, Bryan, Deni, Rob can flag for HP</span>
+    <span class="wf-note">· Jeff has final approval · Only Bill, Jeff, Bryan, Deni, Rob can flag for HP</span>
   </div>
 
   <!-- APRIL 2026 ACCORDION -->
@@ -738,7 +732,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
   <div class="page-head"><div><div class="page-title">Team Members</div><div class="page-sub">Motivated Mind Group — 7 members · Roles &amp; permissions · Initials are auto-generated from your email — profile editing coming soon</div></div><div class="hbtns"><button class="btn btn-pink">+ Invite</button></div></div>
   <div class="ug">
     <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(245,230,99,.2);color:#7A6500;">BG</div><div><div class="u-name">Bill Gusmano</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="781a111414561f0d0b15191617380c101d15170c110e190c1d1c1511161c1f0a170d08561b1715">[email&#160;protected]</a></div><span class="u-rtag r-owner">Owner / Exec Approver</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 on">Publish</span><span class="pt2 on">Manage Users</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">2</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">0</div><div class="u-stat-l">Pending</div></div></div></div>
-    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(0,150,214,.1);color:var(--hp);">JM</div><div><div class="u-name">Jeff</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="307a555656704458555d5f445946514455545d595e5457425f45401e535f5d">[email&#160;protected]</a></div><span class="u-rtag r-am">Account Manager</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 on">Publish</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">1</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">1</div><div class="u-stat-l">Pending</div></div></div></div>
+    <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(0,150,214,.1);color:var(--hp);">JM</div><div><div class="u-name">Jeff</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="307a555656704458555d5f445946514455545d595e5457425f45401e535f5d">[email&#160;protected]</a></div><span class="u-rtag r-owner">Account Manager / Final Approver</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 on">Publish</span><span class="pt2 on">Manage Users</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">1</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">1</div><div class="u-stat-l">Pending</div></div></div></div>
     <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(52,168,83,.12);color:#1B5E20;">BK</div><div><div class="u-name">Bryan</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7f3d0d061e113f0b171a12100b16091e0b1a1b1216111b180d100a0f511c1012">[email&#160;protected]</a></div><span class="u-rtag r-cd">Creative Director</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">1</div><div class="u-stat-l">Pending</div></div></div></div>
     <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(138,95,190,.12);color:var(--lavender);">DL</div><div><div class="u-name">Deni</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1450717a7d54607c71797b607d6275607170797d7a7073667b61643a777b79">[email&#160;protected]</a></div><span class="u-rtag r-pm">Project Manager</span></div></div><div class="perm-wrap"><span class="pt2 on">Approve</span><span class="pt2 on">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Approved</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">Managing</div></div></div></div>
     <div class="uc"><div class="uc-top"><div class="ual" style="background:rgba(255,151,169,.18);color:var(--pink-deep);">RS</div><div><div class="u-name">Rob</div><div class="u-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="96c4f9f4d6e2fef3fbf9e2ffe0f7e2f3f2fbfff8f2f1e4f9e3e6b8f5f9fb">[email&#160;protected]</a></div><span class="u-rtag r-cc">Content Creator</span></div></div><div class="perm-wrap"><span class="pt2">Approve</span><span class="pt2">Reject</span><span class="pt2 on">Regenerate</span><span class="pt2 flag">⚑ Flag for HP</span></div><div class="u-stats"><div><div class="u-stat-v" style="color:var(--s-approve);">0</div><div class="u-stat-l">Created</div></div><div><div class="u-stat-v" style="color:var(--slate);">2</div><div class="u-stat-l">In Review</div></div></div></div>
@@ -780,6 +774,11 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
 
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false">
+// Handle Box OAuth callback before anything else
+if (window.location.search.includes('code=') && window.location.search.includes('state=mmg_')) {
+  // OAuth callback - will be handled after login
+  var _oauthPending = true;
+}
 var _d='themotivatedmindgroup.com';
 function _e(u){return u+'@'+_d;}
 var _u={
@@ -868,7 +867,7 @@ function boxFetch(path, opts) {
   });
 }
 
-function connectBox() {
+function connectBox() { /* Legacy developer token fallback */
   var token = document.getElementById('box-token-input').value.trim();
   if (!token) {
     document.getElementById('box-connect-err').textContent = 'Please paste your Box developer token first.';
@@ -1120,8 +1119,216 @@ async function upDoBoxUpload(file, month, category, filename, btn) {
 }
 
 function showBoxSetup() {
+  // Trigger OAuth re-login if needed
+  var refreshToken = localStorage.getItem('box_refresh_token');
+  if (refreshToken) {
+    refreshBoxToken().then(function(ok){
+      if(ok){ updateBoxStatus(true); loadAllBoxAssets(); }
+      else { document.getElementById('box-modal').style.display = 'flex'; }
+    });
+  } else {
+    document.getElementById('box-modal').style.display = 'flex';
+  }
+}
+
+
+// ── BOX OAUTH PKCE ────────────────────────────────────────────────────────
+// Full OAuth flow - team logs in with their Box accounts, no tokens needed
+
+var BOX_CLIENT_ID = 'jsb1t28fgra278vjxg7loav8nc9jf36w'; // Set from Box dev console
+var BOX_REDIRECT_URI = window.location.origin + window.location.pathname;
+
+function generateVerifier() {
+  var arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode.apply(null, arr))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+async function generateChallenge(verifier) {
+  var data = new TextEncoder().encode(verifier);
+  var digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+async function startBoxOAuth() {
+  var statusEl = document.getElementById('box-oauth-status');
+  if (statusEl) statusEl.textContent = 'Redirecting to Box...';
+
+  var verifier = generateVerifier();
+  var challenge = await generateChallenge(verifier);
+
+  // Store verifier for after redirect
+  sessionStorage.setItem('box_pkce_verifier', verifier);
+  sessionStorage.setItem('box_oauth_state', 'mmg_' + Date.now());
+
+  var params = new URLSearchParams({
+    client_id: BOX_CLIENT_ID,
+    redirect_uri: BOX_REDIRECT_URI,
+    response_type: 'code',
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    state: sessionStorage.getItem('box_oauth_state')
+  });
+
+  window.location.href = 'https://account.box.com/api/oauth2/authorize?' + params.toString();
+}
+
+async function handleOAuthCallback() {
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
+  var state = params.get('state');
+  var storedState = sessionStorage.getItem('box_oauth_state');
+
+  if (!code) return false;
+  if (state && storedState && state !== storedState) {
+    console.error('OAuth state mismatch');
+    return false;
+  }
+
+  var verifier = sessionStorage.getItem('box_pkce_verifier');
+  if (!verifier) return false;
+
+  try {
+    // Exchange code for tokens - PKCE requires no client_secret
+    var body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: BOX_REDIRECT_URI,
+      client_id: BOX_CLIENT_ID,
+      code_verifier: verifier
+    });
+
+    var res = await fetch('https://api.box.com/oauth2/token', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+
+    var data = await res.json();
+
+    if (data.access_token) {
+      BOX_TOKEN = data.access_token;
+      sessionStorage.setItem('box_token', data.access_token);
+      // Store refresh token in localStorage so it persists across sessions
+      if (data.refresh_token) {
+        localStorage.setItem('box_refresh_token', data.refresh_token);
+        localStorage.setItem('box_token_expires', Date.now() + (data.expires_in * 1000));
+      }
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+      sessionStorage.removeItem('box_pkce_verifier');
+      sessionStorage.removeItem('box_oauth_state');
+      return true;
+    }
+  } catch(e) {
+    console.error('OAuth callback error:', e);
+  }
+  return false;
+}
+
+async function refreshBoxToken() {
+  var refreshToken = localStorage.getItem('box_refresh_token');
+  if (!refreshToken) return false;
+
+  try {
+    var body = new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: BOX_CLIENT_ID
+    });
+
+    var res = await fetch('https://api.box.com/oauth2/token', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: body.toString()
+    });
+
+    var data = await res.json();
+
+    if (data.access_token) {
+      BOX_TOKEN = data.access_token;
+      sessionStorage.setItem('box_token', data.access_token);
+      if (data.refresh_token) {
+        localStorage.setItem('box_refresh_token', data.refresh_token);
+        localStorage.setItem('box_token_expires', Date.now() + (data.expires_in * 1000));
+      }
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+async function initBoxConnection() {
+  // Check for OAuth callback first
+  if (window.location.search.includes('code=')) {
+    var success = await handleOAuthCallback();
+    if (success) {
+      updateBoxStatus(true);
+      loadAllBoxAssets();
+      loadBoxActivity();
+      return;
+    }
+  }
+
+  // Check for saved token
+  var savedToken = sessionStorage.getItem('box_token');
+  if (savedToken) {
+    BOX_TOKEN = savedToken;
+    updateBoxStatus(true);
+    loadAllBoxAssets();
+    loadBoxActivity();
+    return;
+  }
+
+  // Check for refresh token - auto-reconnect silently
+  var refreshToken = localStorage.getItem('box_refresh_token');
+  var expires = localStorage.getItem('box_token_expires');
+
+  if (refreshToken) {
+    var needsRefresh = !expires || Date.now() > parseInt(expires) - 300000; // refresh 5min early
+    if (needsRefresh) {
+      var refreshed = await refreshBoxToken();
+      if (refreshed) {
+        updateBoxStatus(true);
+        loadAllBoxAssets();
+        loadBoxActivity();
+        return;
+      }
+    } else {
+      // Token not expired yet — but we don't have it in sessionStorage
+      // This means new tab opened — need to refresh
+      var refreshed = await refreshBoxToken();
+      if (refreshed) {
+        updateBoxStatus(true);
+        loadAllBoxAssets();
+        loadBoxActivity();
+        return;
+      }
+    }
+  }
+
+  // No token, no refresh token — show login modal
   document.getElementById('box-modal').style.display = 'flex';
 }
+
+function boxLogout() {
+  BOX_TOKEN = null;
+  sessionStorage.removeItem('box_token');
+  localStorage.removeItem('box_refresh_token');
+  localStorage.removeItem('box_token_expires');
+  updateBoxStatus(false);
+  document.getElementById('box-modal').style.display = 'flex';
+}
+
+// Auto-refresh token before it expires
+setInterval(async function() {
+  var expires = localStorage.getItem('box_token_expires');
+  if (expires && Date.now() > parseInt(expires) - 300000) {
+    await refreshBoxToken();
+  }
+}, 60000); // Check every minute
 
 // ── ACTIVITY LOG ────────────────────────────────────────────────────────────
 var ACTIVITY = [];
@@ -1245,15 +1452,8 @@ window.logout = logout;
 window.doLogin = doLogin;
 function swTab(t,el){document.querySelectorAll('.l-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('pi').style.display=t==='int'?'block':'none';document.getElementById('pc').style.display=t==='cli'?'block':'none';}
 function doLogin(){var raw=document.getElementById('ie').value.trim().toLowerCase();var em=raw.includes('@')?raw:raw.replace(/[^a-z]/g,'');var pw=document.getElementById('ip').value.trim();var err=document.getElementById('ei');if(pw!=='hp2025'||!USERS[em]){err.style.display='block';return;}err.style.display='none';curUser=USERS[em];document.getElementById('ls').style.display='none';document.getElementById('iv').style.display='block';var av=document.getElementById('iav');av.textContent=curUser.i;av.style.background=curUser.bg;av.style.color=curUser.fg;var sb=document.getElementById('sb-'+curUser.sb);if(sb)sb.classList.add('me');
-  // Check for existing session token, otherwise show Box setup
-  var savedToken = sessionStorage.getItem('box_token');
-  if (savedToken) {
-    BOX_TOKEN = savedToken;
-    updateBoxStatus(true);
-    setTimeout(function(){ loadAllBoxAssets(); loadBoxActivity(); }, 300);
-  } else {
-    setTimeout(function(){ document.getElementById('box-modal').style.display = 'flex'; }, 400);
-  }if(!curUser.canFlag){document.querySelectorAll('.xb-fl[data-can="true"]').forEach(b=>{b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
+  // Initialize Box connection - OAuth handles everything
+  setTimeout(function(){ initBoxConnection(); }, 400);if(!curUser.canFlag){document.querySelectorAll('.xb-fl[data-can="true"]').forEach(b=>{b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
 
 function toggleFlag(btn,id){
   if(btn.classList.contains('xb-locked'))return;
@@ -1307,6 +1507,109 @@ function upDoUpload(){
   logActivity('act-upload', upGetFname(), UP.catLabel, UP.month);
   document.getElementById('ups4').style.display='none';document.getElementById('ups-success').style.display='block';document.getElementById('ups-success-msg').innerHTML='Box is open at: <strong>'+UP.month+' / '+UP.cat+' / 01-AI-Draft</strong>.<br>Rename your file to <strong>'+upGetFname()+'</strong> then drop it in.';upOpenBox();}
 function upReset(){UP={month:'',monthId:'',cat:'',catLabel:'',type:'',fmt:'',file:null};document.getElementById('ups-success').style.display='none';document.querySelectorAll('.m-card,.cat-card,.type-card').forEach(c=>c.classList.remove('sel'));document.getElementById('up-dropzone').classList.remove('has-file');document.getElementById('up-dz-icon').textContent='📁';document.getElementById('up-dz-main').textContent='Drop your file here or click to browse';document.getElementById('up-dz-sub').textContent='JPG, PNG, MP4, TXT · Max 500MB';document.getElementById('up-fmt-wrap').style.display='none';document.getElementById('upnext1').disabled=true;document.getElementById('upnext2').disabled=true;document.getElementById('upnext3').disabled=true;document.getElementById('up-final-btn').disabled=true;upStep(1);}
+
+// ── APPROVE / FLAG FUNCTIONS ──────────────────────────────────────────────
+
+window.toggleA = function(btn) {
+  btn.classList.toggle('on');
+  var approved = btn.classList.contains('on');
+  btn.textContent = approved ? '✓ Approved' : 'Approve';
+  var card = btn.closest('.ab');
+  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
+  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
+  if (typeof logActivity === 'function') logActivity(approved ? 'act-approve' : 'act-reject', title, '', cat);
+};
+
+window.toggleABox = function(btn) {
+  btn.classList.toggle('on');
+  var approved = btn.classList.contains('on');
+  btn.textContent = approved ? '✓ Approved' : 'Approve';
+  var card = btn.closest('.ab');
+  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
+  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
+  if (typeof logActivity === 'function') logActivity(approved ? 'act-approve' : 'act-reject', title, '', cat);
+  if (approved && typeof BOX_TOKEN !== 'undefined' && BOX_TOKEN && typeof boxMove === 'function') {
+    var match = window.getFileIdForCard ? window.getFileIdForCard(btn) : null;
+    if (match) boxMove(match.id, 'approve', match.category, '2026-04-April', btn);
+  }
+};
+
+window.toggleFlagBox = function(btn, id) {
+  if (btn.classList.contains('xb-locked')) return;
+  btn.classList.toggle('flagged');
+  var flagged = btn.classList.contains('flagged');
+  btn.textContent = flagged ? '⚑ Flagged for HP' : '⚑ Flag for HP';
+  var flagEl = document.getElementById('flag-count');
+  if (flagEl) flagEl.textContent = parseInt(flagEl.textContent || '0') + (flagged ? 1 : -1);
+  var card = btn.closest('.ab');
+  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
+  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
+  if (typeof logActivity === 'function') logActivity('act-flag', title, 'Flagged for HP', cat);
+  if (flagged && typeof BOX_TOKEN !== 'undefined' && BOX_TOKEN && typeof boxMove === 'function') {
+    var match = window.getFileIdForCard ? window.getFileIdForCard(btn) : null;
+    if (match) boxMove(match.id, 'flag', match.category, '2026-04-April', btn);
+  }
+};
+
+window.getFileIdForCard = function(btn) {
+  var card = btn.closest('.ac');
+  if (!card) return null;
+  var catEl = card.querySelector('.a-meta span');
+  if (!catEl) return null;
+  var catText = catEl.textContent.toLowerCase();
+  var assets = (typeof BOX_ASSETS_CACHE !== 'undefined' && BOX_ASSETS_CACHE['2026-04-April']) || [];
+  for (var i = 0; i < assets.length; i++) {
+    var a = assets[i];
+    var catName = a.category.toLowerCase().replace(/-/g, ' ');
+    if (catText.includes(catName.split(' ')[0]) || catName.includes(catText.split('/')[0].trim())) {
+      return {id: a.id, category: a.category};
+    }
+  }
+  return null;
+};
+
+window.renderBoxAssets = function(month) {
+  var assets = (typeof BOX_ASSETS_CACHE !== 'undefined' && BOX_ASSETS_CACHE[month]) || [];
+  var approved = assets.filter(function(a){ return a.stageKey === 'approved'; }).length;
+  var pending = assets.filter(function(a){ return a.stageKey === 'draft' || a.stageKey === 'review'; }).length;
+  var flagged = assets.filter(function(a){ return a.stageKey === 'client'; }).length;
+  var stats = document.querySelectorAll('.sv');
+  if (stats[0]) stats[0].textContent = assets.length || '7';
+  if (stats[1]) stats[1].textContent = approved;
+  if (stats[2]) stats[2].textContent = pending;
+  if (stats[3]) stats[3].textContent = flagged;
+  assets.forEach(function(asset) {
+    document.querySelectorAll('.ac').forEach(function(card) {
+      var catEl = card.querySelector('.a-meta span');
+      if (!catEl) return;
+      var catText = catEl.textContent.toLowerCase();
+      var catName = asset.category.toLowerCase().replace(/-/g, ' ');
+      if (catText.includes(catName.split(' ')[0])) {
+        if (!card.querySelector('.real-badge')) {
+          var badge = document.createElement('div');
+          badge.className = 'real-badge';
+          badge.textContent = '● LIVE';
+          var ap = card.querySelector('.ap');
+          if (ap) ap.appendChild(badge);
+        }
+      }
+    });
+  });
+};
+
+window.approveAll = function() {
+  document.querySelectorAll('.xb-ok').forEach(function(b) {
+    if (!b.classList.contains('on')) {
+      b.classList.add('on');
+      b.textContent = '✓ Approved';
+      var card = b.closest('.ab');
+      var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
+      var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
+      if (typeof logActivity === 'function') logActivity('act-approve', title, '', cat);
+    }
+  });
+};
+
 </script>
 </body>
 </html>
