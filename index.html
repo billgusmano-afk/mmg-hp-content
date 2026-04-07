@@ -336,12 +336,16 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
       <div class="box-setup-title">Connect to Box</div>
       <div class="box-setup-sub">Paste your Box developer token to enable live approvals, real asset thumbnails, and activity tracking. Your token stays in this browser session only — never stored permanently.</div>
       <div class="box-token-hint">
-        Get your token: <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a> → your app → Generate Developer Token.<br>
-        Valid for 60 minutes. Click <strong>Reconnect Box</strong> in the sidebar to refresh anytime.
+        <strong>Step 1</strong> — Go to <a href="https://app.box.com/developers/console" target="_blank">app.box.com/developers/console</a><br>
+        <strong>Step 2</strong> — Click <strong>HP content engine</strong> (the OAuth 2.0 app)<br>
+        <strong>Step 3</strong> — Click the <strong>Configuration</strong> tab<br>
+        <strong>Step 4</strong> — Scroll to <strong>Developer Token</strong> → click <strong>Generate Developer Token</strong><br>
+        <strong>Step 5</strong> — Copy the full token and paste it below immediately<br><br>
+        Token expires after 60 minutes. Use <strong>Reconnect Box</strong> in the sidebar to refresh.
       </div>
       <input class="box-token-input" id="box-token-input" type="password" placeholder="paste your Box developer token here...">
       <div id="box-connect-err" style="font-size:11px;color:var(--s-reject);margin-bottom:10px;display:none;">Token invalid or expired. Please generate a fresh token from app.box.com/developers/console</div>
-      <button class="box-connect-btn" onclick="connectBox()">Connect to Box ↗</button>
+      <button class="box-connect-btn" onclick="connectBox()">Connect to Box</button>
       <button class="box-skip-btn" onclick="skipBox()">Continue without Box — use dashboard UI only</button>
       <div class="box-status-bar">
         <span>⚡</span>
@@ -866,48 +870,20 @@ function boxFetch(path, opts) {
 
 function connectBox() {
   var token = document.getElementById('box-token-input').value.trim();
-  if (!token) return;
-  var btn = document.querySelector('.box-connect-btn');
-  btn.textContent = 'Connecting...';
-  btn.disabled = true;
-  var errEl = document.getElementById('box-connect-err');
-  errEl.style.display = 'none';
-  // Test token with a simple folder lookup (better CORS support than /users/me)
-  fetch('https://api.box.com/2.0/folders/374589121452?fields=id,name', {
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/json'
-    }
-  }).then(function(r) {
-    if (r.status === 401 || r.status === 403) throw new Error('invalid');
-    if (!r.ok) throw new Error('error');
-    return r.json();
-  }).then(function(folder) {
-    BOX_TOKEN = token;
-    sessionStorage.setItem('box_token', token);
-    document.getElementById('box-modal').style.display = 'none';
-    updateBoxStatus(true, 'Box: ' + (folder.name || 'Connected'));
-    loadAllBoxAssets();
-    loadBoxActivity();
-    btn.textContent = 'Connect to Box ↗';
-    btn.disabled = false;
-  }).catch(function(err) {
-    // If CORS blocks, try accepting the token anyway with a warning
-    if (err.message === 'invalid') {
-      errEl.textContent = 'Token invalid or expired. Please generate a fresh token from app.box.com/developers/console';
-      errEl.style.display = 'block';
-    } else {
-      // CORS or network error - accept token and try anyway
-      BOX_TOKEN = token;
-      sessionStorage.setItem('box_token', token);
-      document.getElementById('box-modal').style.display = 'none';
-      updateBoxStatus(true);
-      loadAllBoxAssets();
-      loadBoxActivity();
-    }
-    btn.textContent = 'Connect to Box ↗';
-    btn.disabled = false;
-  });
+  if (!token) {
+    document.getElementById('box-connect-err').textContent = 'Please paste your Box developer token first.';
+    document.getElementById('box-connect-err').style.display = 'block';
+    return;
+  }
+  // Store token immediately - no validation call needed
+  // Box API calls will fail gracefully if token is wrong
+  BOX_TOKEN = token;
+  sessionStorage.setItem('box_token', token);
+  document.getElementById('box-modal').style.display = 'none';
+  updateBoxStatus(true);
+  // Try loading assets - this will show if token actually works
+  loadAllBoxAssets();
+  loadBoxActivity();
 }
 
 function skipBox() {
@@ -919,7 +895,7 @@ function updateBoxStatus(connected, userName) {
   var el = document.getElementById('box-status');
   if (!el) return;
   if (connected) {
-    el.textContent = '⬤ Box Live';
+    el.textContent = '⬤ Box Connected';
     el.style.background = 'rgba(52,168,83,.15)';
     el.style.color = '#1B5E20';
     var infoBar = document.getElementById('box-info-bar'); if(infoBar) infoBar.style.display='none';
@@ -966,23 +942,35 @@ async function loadAllBoxAssets() {
   renderBoxAssets(month);
 }
 
-// Load real Box thumbnails for an asset card
-function loadThumb(fileId, containerId) {
-  if (!BOX_TOKEN) return;
-  fetch('https://api.box.com/2.0/files/' + fileId + '/thumbnail.jpg?min_height=400&min_width=400', {
-    headers: {'Authorization': 'Bearer ' + BOX_TOKEN}
-  }).then(function(r) {
-    if (!r.ok) throw new Error('no thumb');
-    return r.blob();
-  }).then(function(blob) {
-    var url = URL.createObjectURL(blob);
-    var el = document.getElementById(containerId);
-    if (el) {
-      el.innerHTML = '<img class="thumb-img" src="' + url + '" alt="Asset preview">';
-    }
-  }).catch(function() {
-    // Keep placeholder
-  });
+// Show real file info in asset card preview area
+function loadThumb(fileId, containerId, fileName, fileSize) {
+  // Box thumbnails require server proxy - show file info instead
+  // User can click "Open in Box" to see the actual image
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var isTikTok = fileName && fileName.toLowerCase().includes('tiktok');
+  var isMeme = fileName && (fileName.toLowerCase().includes('meme') || fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.png'));
+  var ext = fileName ? fileName.split('.').pop().toUpperCase() : '';
+  var kb = fileSize ? Math.round(fileSize/1024) + ' KB' : '';
+  var name = fileName ? fileName.replace(/_/g,' ').replace(/Draft/,'').trim() : 'Asset';
+  // Truncate long names
+  if (name.length > 35) name = name.substring(0,35) + '...';
+  el.innerHTML =
+    '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;background:linear-gradient(135deg,rgba(255,151,169,.08),rgba(255,151,169,.03));">' +
+    '<div style="font-size:28px;">' + (isTikTok ? '🎬' : isMeme ? '🖼️' : '📄') + '</div>' +
+    '<div style="font-size:9px;font-weight:700;letter-spacing:.8px;color:var(--pink-deep);">' + ext + ' · LIVE FROM BOX</div>' +
+    '<div style="font-size:9px;color:var(--text-mid);text-align:center;line-height:1.4;">' + name + '</div>' +
+    (kb ? '<div style="font-size:8px;color:var(--text-soft);">' + kb + '</div>' : '') +
+    '<a href="https://app.box.com/file/' + fileId + '" target="_blank" style="font-size:9px;font-weight:700;padding:4px 10px;border-radius:6px;background:var(--hp);color:#fff;text-decoration:none;margin-top:4px;">Preview in Box ↗</a>' +
+    '</div>';
+  // Add LIVE badge
+  var ap = el.closest('.ap');
+  if (ap && !ap.querySelector('.real-badge')) {
+    var badge = document.createElement('div');
+    badge.className = 'real-badge';
+    badge.textContent = '● LIVE';
+    ap.appendChild(badge);
+  }
 }
 
 
@@ -1230,6 +1218,31 @@ function logout(){
   if(status){status.textContent='⬤ Box Connected';status.style.color='#1B5E20';}
 }
 
+
+function showIT(tab, el) {
+  ['review','approvals','activity','upload','users','box'].forEach(function(t) {
+    var e = document.getElementById('it-' + t);
+    if (e) e.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.snav li a').forEach(function(a) {
+    a.classList.remove('active');
+  });
+  if (el) el.classList.add('active');
+  // Load Box activity when Activity tab is opened
+  if (tab === 'activity' && BOX_TOKEN) {
+    loadBoxActivity();
+  }
+}
+
+window.showIT = showIT;
+window.showBoxSetup = showBoxSetup;
+window.openBox = openBox;
+window.toggleA = toggleA;
+window.approveAll = approveAll;
+window.toggleFlag = toggleFlag;
+window.toggleAcc = toggleAcc;
+window.logout = logout;
+window.doLogin = doLogin;
 function swTab(t,el){document.querySelectorAll('.l-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('pi').style.display=t==='int'?'block':'none';document.getElementById('pc').style.display=t==='cli'?'block':'none';}
 function doLogin(){var raw=document.getElementById('ie').value.trim().toLowerCase();var em=raw.includes('@')?raw:raw.replace(/[^a-z]/g,'');var pw=document.getElementById('ip').value.trim();var err=document.getElementById('ei');if(pw!=='hp2025'||!USERS[em]){err.style.display='block';return;}err.style.display='none';curUser=USERS[em];document.getElementById('ls').style.display='none';document.getElementById('iv').style.display='block';var av=document.getElementById('iav');av.textContent=curUser.i;av.style.background=curUser.bg;av.style.color=curUser.fg;var sb=document.getElementById('sb-'+curUser.sb);if(sb)sb.classList.add('me');
   // Check for existing session token, otherwise show Box setup
