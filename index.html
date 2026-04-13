@@ -334,7 +334,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
         <div style="font-family:'Source Serif 4',serif;font-size:14px;font-weight:600;">Connect to Box</div>
       </div>
       <div class="box-setup-title">Sign in with your Box account</div>
-      <div class="box-setup-sub">Click below to connect your MMG Box account. If you are already signed into Box in this browser it connects instantly. You only need to do this once.</div>
+      <div class="box-setup-sub">Click below to sign in with your existing MMG Box account. You only need to do this once — you'll stay connected automatically.</div>
       <button class="box-login-btn" onclick="startBoxOAuth()">
         <div class="box-login-icon">B</div>
         Login with Box
@@ -631,7 +631,7 @@ main { flex: 1; padding: 28px 32px; overflow-y: auto; background: var(--warm-gra
 
   <div class="act-box-note">
     <div class="box-ic">B</div>
-    <span>The log below is session-only and resets on refresh. When Box is connected, every action is also permanently written as a Box comment on the file — visible in Box forever. Connect to Box to load the full history. <a href="https://app.box.com/folder/374589121452" target="_blank">Open Box ↗</a></span>
+    <span>Every approval and upload is permanently logged as a <strong>Box comment on the file</strong> — visible in Box forever, even after this session ends. Connect to Box to load the full history. <a href="https://app.box.com/folder/374589121452" target="_blank">Open Box ↗</a></span>
   </div>
 
   <div class="act-filter">
@@ -783,12 +783,12 @@ var _d='themotivatedmindgroup.com';
 function _e(u){return u+'@'+_d;}
 var _u={
   bill:{i:'BG',bg:'rgba(245,230,99,.25)',fg:'#7A6500',n:'Bill Gusmano',sb:'BG',canFlag:true},
-  jeff:{i:'JG',bg:'rgba(0,150,214,.15)',fg:'#0096D6',n:'Jeff Gibbs',sb:'JG',canFlag:true},
-  bryan:{i:'BH',bg:'rgba(52,168,83,.15)',fg:'#1B5E20',n:'Bryan Heiden',sb:'BH',canFlag:true},
-  deni:{i:'DD',bg:'rgba(138,95,190,.15)',fg:'#8A5FBE',n:'Deni Daily',sb:'DD',canFlag:true},
-  rob:{i:'RS',bg:'rgba(255,151,169,.2)',fg:'#F4607A',n:'Rob S.',sb:'RS',canFlag:true},
-  tracy:{i:'TB',bg:'rgba(188,244,245,.35)',fg:'#006064',n:'Tracy Baker',sb:'TB',canFlag:false},
-  paul:{i:'PC',bg:'rgba(128,117,255,.15)',fg:'#8075FF',n:'Paul Cameron',sb:'PC',canFlag:false}
+  jeff:{i:'JM',bg:'rgba(0,150,214,.15)',fg:'#0096D6',n:'Jeff',sb:'JM',canFlag:true},
+  bryan:{i:'BK',bg:'rgba(52,168,83,.15)',fg:'#1B5E20',n:'Bryan',sb:'BK',canFlag:true},
+  deni:{i:'DL',bg:'rgba(138,95,190,.15)',fg:'#8A5FBE',n:'Deni',sb:'DL',canFlag:true},
+  rob:{i:'RS',bg:'rgba(255,151,169,.2)',fg:'#F4607A',n:'Rob',sb:'RS',canFlag:true},
+  tracy:{i:'TW',bg:'rgba(188,244,245,.35)',fg:'#006064',n:'Tracy',sb:'TW',canFlag:false},
+  paul:{i:'PC',bg:'rgba(128,117,255,.15)',fg:'#8075FF',n:'Paul',sb:'PC',canFlag:false}
 };
 var USERS={};
 USERS['bill']=_u.bill; USERS[_e('bill.gusmano')]=_u.bill;
@@ -1445,6 +1445,7 @@ function showIT(tab, el) {
 window.showIT = showIT;
 window.showBoxSetup = showBoxSetup;
 window.openBox = openBox;
+window.toggleA = toggleA;
 window.approveAll = approveAll;
 window.toggleFlag = toggleFlag;
 window.toggleAcc = toggleAcc;
@@ -1453,7 +1454,7 @@ window.doLogin = doLogin;
 function swTab(t,el){document.querySelectorAll('.l-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('pi').style.display=t==='int'?'block':'none';document.getElementById('pc').style.display=t==='cli'?'block':'none';}
 function doLogin(){var raw=document.getElementById('ie').value.trim().toLowerCase();var em=raw.includes('@')?raw:raw.replace(/[^a-z]/g,'');var pw=document.getElementById('ip').value.trim();var err=document.getElementById('ei');if(pw!=='hp2025'||!USERS[em]){err.style.display='block';return;}err.style.display='none';curUser=USERS[em];document.getElementById('ls').style.display='none';document.getElementById('iv').style.display='block';var av=document.getElementById('iav');av.textContent=curUser.i;av.style.background=curUser.bg;av.style.color=curUser.fg;var sb=document.getElementById('sb-'+curUser.sb);if(sb)sb.classList.add('me');
   // Initialize Box connection - OAuth handles everything
-  setTimeout(function(){ initBoxConnection(); }, 400);if(curUser.canFlag){document.querySelectorAll('.xb-fl').forEach(function(b){b.classList.remove('xb-locked');b.setAttribute('onclick','event.stopPropagation();toggleFlagBox(this)');b.title='';});}else{document.querySelectorAll('.xb-fl').forEach(function(b){b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag for HP';});}}
+  setTimeout(function(){ initBoxConnection(); }, 400);if(!curUser.canFlag){document.querySelectorAll('.xb-fl[data-can="true"]').forEach(b=>{b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
 
 function toggleFlag(btn,id){
   if(btn.classList.contains('xb-locked'))return;
@@ -1726,172 +1727,6 @@ window.submitRegen = function() {
     if (match) writeFeedbackComment(match.id, '↻ Regen requested · Direction: '+direction+' · Category: '+match.category);
   }
   saveFeedback('regen', title, cat, directions, note);
-  window.closeRegenModal();
-};
-
-
-// ── ALL REQUIRED FUNCTIONS ────────────────────────────────────────────────
-
-window.showIT = window.showIT || function(tab, el) {
-  ['review','approvals','activity','upload','users','box'].forEach(function(t) {
-    var e = document.getElementById('it-' + t);
-    if (e) e.style.display = t === tab ? 'block' : 'none';
-  });
-  document.querySelectorAll('.snav li a').forEach(function(a) { a.classList.remove('active'); });
-  if (el) el.classList.add('active');
-};
-
-window.toggleA = function(btn) {
-  btn.classList.toggle('on');
-  var a = btn.classList.contains('on');
-  btn.textContent = a ? '✓ Approved' : 'Approve';
-  var card = btn.closest('.ab');
-  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
-  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
-  if (typeof logActivity === 'function') logActivity(a ? 'act-approve' : 'act-reject', title, '', cat);
-};
-
-window.toggleABox = function(btn) {
-  btn.classList.toggle('on');
-  var a = btn.classList.contains('on');
-  btn.textContent = a ? '✓ Approved' : 'Approve';
-  var card = btn.closest('.ab');
-  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
-  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
-  if (typeof logActivity === 'function') logActivity(a ? 'act-approve' : 'act-reject', title, '', cat);
-  if (a && typeof BOX_TOKEN !== 'undefined' && BOX_TOKEN && typeof boxMove === 'function') {
-    var m = window.getFileIdForCard ? window.getFileIdForCard(btn) : null;
-    if (m) boxMove(m.id, 'approve', m.category, '2026-04-April', btn);
-  }
-};
-
-window.toggleFlagBox = function(btn) {
-  if (btn.classList.contains('xb-locked')) return;
-  btn.classList.toggle('flagged');
-  var f = btn.classList.contains('flagged');
-  btn.textContent = f ? '⧑ Flagged for HP' : '⧑ Flag for HP';
-  var fe = document.getElementById('flag-count');
-  if (fe) fe.textContent = parseInt(fe.textContent||'0') + (f?1:-1);
-  var card = btn.closest('.ab');
-  var title = card && card.querySelector('.a-title') ? card.querySelector('.a-title').textContent : 'Asset';
-  var cat = card && card.querySelector('.a-meta span') ? card.querySelector('.a-meta span').textContent : '';
-  if (typeof logActivity === 'function') logActivity('act-flag', title, '', cat);
-  if (f && typeof BOX_TOKEN !== 'undefined' && BOX_TOKEN && typeof boxMove === 'function') {
-    var m = window.getFileIdForCard ? window.getFileIdForCard(btn) : null;
-    if (m) boxMove(m.id, 'flag', m.category, '2026-04-April', btn);
-  }
-};
-
-window.getFileIdForCard = function(btn) {
-  var card = btn.closest('.ac'); if (!card) return null;
-  var catEl = card.querySelector('.a-meta span'); if (!catEl) return null;
-  var catText = catEl.textContent.toLowerCase();
-  var assets = (typeof BOX_ASSETS_CACHE !== 'undefined' && BOX_ASSETS_CACHE['2026-04-April']) || [];
-  for (var i = 0; i < assets.length; i++) {
-    var a = assets[i], catName = a.category.toLowerCase().replace(/-/g,' ');
-    if (catText.includes(catName.split(' ')[0])) return {id: a.id, category: a.category};
-  }
-  return null;
-};
-
-window.renderBoxAssets = function(month) {
-  var assets = (typeof BOX_ASSETS_CACHE !== 'undefined' && BOX_ASSETS_CACHE[month]) || [];
-  var stats = document.querySelectorAll('.sv');
-  if (stats[0]) stats[0].textContent = assets.length || '7';
-  if (stats[1]) stats[1].textContent = assets.filter(function(a){return a.stageKey==='approved';}).length;
-  if (stats[2]) stats[2].textContent = assets.filter(function(a){return a.stageKey==='draft'||a.stageKey==='review';}).length;
-  if (stats[3]) stats[3].textContent = assets.filter(function(a){return a.stageKey==='client';}).length;
-};
-
-window.approveAll = function() {
-  document.querySelectorAll('.xb-ok').forEach(function(b) {
-    if (!b.classList.contains('on')) { b.classList.add('on'); b.textContent='✓ Approved'; }
-  });
-};
-
-// ── FEEDBACK & REGEN SYSTEM ───────────────────────────────────────────────
-
-var _rejectBtn = null;
-var _regenBtn  = null;
-
-window.openRejectModal = function(btn) {
-  _rejectBtn = btn;
-  document.querySelectorAll('#reject-chips .fb-chip').forEach(function(c){c.classList.remove('sel');});
-  document.getElementById('reject-note').value = '';
-  document.getElementById('reject-modal').style.display = 'flex';
-};
-window.closeRejectModal = function() {
-  document.getElementById('reject-modal').style.display = 'none';
-  _rejectBtn = null;
-};
-window.openRegenModal = function(btn) {
-  _regenBtn = btn;
-  document.querySelectorAll('.rg-dir-chip').forEach(function(c){c.classList.remove('sel');});
-  document.getElementById('regen-note').value = '';
-  document.getElementById('regen-modal').style.display = 'flex';
-};
-window.closeRegenModal = function() {
-  document.getElementById('regen-modal').style.display = 'none';
-  _regenBtn = null;
-};
-window.toggleChip = function(chip) { chip.classList.toggle('sel'); };
-window.toggleDirChip = function(chip) { chip.classList.toggle('sel'); };
-
-function _getChips(sel) {
-  return Array.from(document.querySelectorAll(sel+' .sel')).map(function(c){return c.textContent.trim();});
-}
-function _writeFbComment(fileId, msg) {
-  if (typeof BOX_TOKEN==='undefined'||!BOX_TOKEN) return;
-  var user = typeof curUser!=='undefined'&&curUser?curUser.n:'Team';
-  var d = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  fetch('https://api.box.com/2.0/comments',{method:'POST',
-    headers:{'Authorization':'Bearer '+BOX_TOKEN,'Content-Type':'application/json'},
-    body:JSON.stringify({item:{type:'file',id:fileId},message:msg+' · By: '+user+' · '+d})
-  }).catch(function(){});
-}
-function _saveFb(type, title, cat, reasons, note) {
-  var h=[];
-  try{h=JSON.parse(localStorage.getItem('mmg_feedback')||'[]');}catch(e){}
-  h.push({type:type,title:title,category:cat,reasons:reasons,note:note,
-    user:typeof curUser!=='undefined'&&curUser?curUser.n:'Unknown',
-    date:new Date().toISOString(),month:'2026-04-April'});
-  if(h.length>200)h=h.slice(-200);
-  try{localStorage.setItem('mmg_feedback',JSON.stringify(h));}catch(e){}
-}
-
-window.submitReject = function() {
-  var reasons = _getChips('#reject-chips');
-  var note = document.getElementById('reject-note').value.trim();
-  var btn = _rejectBtn;
-  var feedback = reasons.concat(note?[note]:[]).join(' · ')||'No reason given';
-  if (btn) { btn.classList.add('on'); btn.textContent='✕ Rejected'; btn.style.cssText='background:rgba(229,57,53,.15);color:#C62828;border:1.5px solid rgba(229,57,53,.3);'; }
-  var card=btn?btn.closest('.ab'):null;
-  var title=card&&card.querySelector('.a-title')?card.querySelector('.a-title').textContent:'Asset';
-  var cat=card&&card.querySelector('.a-meta span')?card.querySelector('.a-meta span').textContent:'';
-  if(typeof logActivity==='function') logActivity('act-reject',title,'Feedback: '+feedback,cat);
-  if(typeof BOX_TOKEN!=='undefined'&&BOX_TOKEN){
-    var m=typeof getFileIdForCard==='function'&&btn?getFileIdForCard(btn):null;
-    if(m){if(typeof boxMove==='function')boxMove(m.id,'reject',m.category,'2026-04-April',btn);_writeFbComment(m.id,'✕ Rejected · Reason: '+feedback+' · Category: '+m.category);}
-  }
-  _saveFb('reject',title,cat,reasons,note);
-  window.closeRejectModal();
-};
-
-window.submitRegen = function() {
-  var dirs = _getChips('.rg-direction');
-  var note = document.getElementById('regen-note').value.trim();
-  var btn = _regenBtn;
-  var direction = dirs.concat(note?[note]:[]).join(' · ')||'No direction given';
-  if(btn){var orig=btn.textContent;btn.textContent='↻ Direction saved';btn.style.cssText='background:rgba(30,39,97,.12);color:#1E2761;';setTimeout(function(){btn.textContent=orig;btn.style.cssText='';},2500);}
-  var card=btn?btn.closest('.ab'):null;
-  var title=card&&card.querySelector('.a-title')?card.querySelector('.a-title').textContent:'Asset';
-  var cat=card&&card.querySelector('.a-meta span')?card.querySelector('.a-meta span').textContent:'';
-  if(typeof logActivity==='function') logActivity('act-regen',title,'Direction: '+direction,cat);
-  if(typeof BOX_TOKEN!=='undefined'&&BOX_TOKEN){
-    var m=typeof getFileIdForCard==='function'&&btn?getFileIdForCard(btn):null;
-    if(m) _writeFbComment(m.id,'↻ Regen requested · Direction: '+direction+' · Category: '+m.category);
-  }
-  _saveFb('regen',title,cat,dirs,note);
   window.closeRegenModal();
 };
 
