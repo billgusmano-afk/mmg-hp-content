@@ -1720,21 +1720,16 @@ function buildPrompt(sug) {
   var cat   = sug.category || 'HP products';
   var fmt   = sug.format ? ' Style/trend: ' + sug.format + '.' : '';
   var idea  = sug.text;
-  var user  = sug.user || 'the team';
+  var user  = sug.user || 'team';
 
   var wantTikTok = types.toLowerCase().indexOf('tiktok') !== -1 || types.toLowerCase().indexOf('either') !== -1;
   var wantMeme   = types.toLowerCase().indexOf('meme')   !== -1 || types.toLowerCase().indexOf('either') !== -1;
 
-  var formatInstr = '';
-  if (wantTikTok && wantMeme) {
-    formatInstr = 'Generate BOTH a TikTok script AND a meme concept.\n\nTIKTOK SCRIPT\nHook (first 3 seconds): ...\nBody: ...\nCTA: ...\n\nMEME CONCEPT\nVisual: ...\nCaption/text overlay: ...';
-  } else if (wantTikTok) {
-    formatInstr = 'Generate a TikTok script.\n\nHook (first 3 seconds): ...\nBody: ...\nCTA: ...';
-  } else {
-    formatInstr = 'Generate a meme concept.\n\nVisual: ...\nCaption/text overlay: ...';
-  }
+  var typeInstr = wantTikTok && wantMeme ? 'both a TikTok AND a meme'
+                : wantTikTok ? 'a TikTok'
+                : 'a meme';
 
-  return 'You are an expert Gen-Z social media content creator for HP (Hewlett-Packard) products, working with The Motivated Mind Group (MMG). Your content is edgy, funny, relatable, and always subtly promotes the product without feeling like an ad.\n\nHP Category: ' + cat + '.\n' + fmt + '\nSuggestion from ' + user + ': ' + idea + '\n\n' + formatInstr + '\n\nKeep it punchy. No hashtags. No emojis unless they are essential to the joke.';
+  return 'You are an expert Gen-Z social media content creator for HP (Hewlett-Packard) products at The Motivated Mind Group (MMG). Your content is edgy, funny, relatable, and subtly promotes the product without feeling like an ad.\n\nHP Category: ' + cat + '.' + fmt + '\nSuggestion from ' + user + ': ' + idea + '\n\nGenerate ' + typeInstr + ' as a JSON object ONLY — no markdown, no explanation, just raw JSON.\n\nFor a TikTok use this shape:\n{\n  "type": "tiktok",\n  "title": "short punchy title",\n  "palette": {"bg": "#hexcolor", "accent": "#hexcolor", "text": "#hexcolor"},\n  "scenes": [\n    {"duration": 2500, "text": "HOOK LINE", "size": 52, "weight": "900", "align": "center"},\n    {"duration": 3000, "text": "Body line 1", "size": 32, "weight": "700", "align": "center"},\n    {"duration": 3000, "text": "Body line 2", "size": 32, "weight": "700", "align": "center"},\n    {"duration": 2500, "text": "CTA line", "size": 28, "weight": "600", "align": "center"}\n  ],\n  "voiceover": "Full voiceover script as one string",\n  "music_mood": "e.g. upbeat trap, lo-fi chill",\n  "firefly_prompt": "Image generation prompt for Adobe Firefly"\n}\n\nFor a meme use this shape:\n{\n  "type": "meme",\n  "title": "short punchy title",\n  "palette": {"bg": "#hexcolor", "accent": "#hexcolor", "text": "#hexcolor"},\n  "top_text": "TOP CAPTION",\n  "bottom_text": "BOTTOM CAPTION",\n  "visual_description": "Describe the image/scene",\n  "firefly_prompt": "Image generation prompt for Adobe Firefly"\n}\n\nIf generating both, return a JSON array with two objects (tiktok first, meme second).\nChoose palette colors that feel Gen-Z and on-brand for HP (blues, magentas, clean whites, bold contrast). Keep text SHORT — each scene line max 8 words.';
 }
 
 window.generateDraft = function(sug, onDone, onError) {
@@ -1798,7 +1793,23 @@ window.renderDraftCard = function(d) {
     : '';
   var approveDisabled = d.status !== 'pending' ? 'disabled style="opacity:.4;cursor:not-allowed;"' : '';
   var rejectDisabled  = d.status !== 'pending' ? 'disabled style="opacity:.4;cursor:not-allowed;"' : '';
-  var contentHtml = d.content.replace(/\n/g, '<br>');
+  var contentHtml = (function() {
+    try {
+      var raw = d.content.trim().replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/,'');
+      var parsed = JSON.parse(raw);
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      return arr.map(function(p) {
+        if (p.type === 'tiktok') {
+          var lines = (p.scenes||[]).map(function(s,i){ return '<div style="margin-bottom:4px;"><span style="font-size:10px;color:#aaa;">Scene '+(i+1)+':</span> '+s.text+'</div>'; }).join('');
+          return '<div style="margin-bottom:12px;"><div style="font-size:10px;font-weight:700;color:#0096D6;text-transform:uppercase;margin-bottom:6px;">TikTok — '+( p.title||'')+'</div>'+lines+(p.voiceover?'<div style="margin-top:8px;font-size:11px;color:#888;font-style:italic;">Voiceover: '+p.voiceover+'</div>':'')+'</div>';
+        } else {
+          return '<div><div style="font-size:10px;font-weight:700;color:#F4607A;text-transform:uppercase;margin-bottom:6px;">Meme — '+(p.title||'')+'</div><div style="font-weight:700;font-size:15px;">'+( p.top_text||'')+'</div><div style="font-size:11px;color:#888;margin:4px 0;font-style:italic;">['+( p.visual_description||'image')+ ']</div><div style="font-weight:700;font-size:15px;">'+(p.bottom_text||'')+'</div></div>';
+        }
+      }).join('<hr style="border:none;border-top:1px solid #eee;margin:12px 0;">');
+    } catch(e) {
+      return d.content.replace(/\n/g, '<br>');
+    }
+  })();
   return '<div id="' + d.id + '" style="background:#fff;border-radius:14px;border:1.5px solid #E5E5E5;padding:22px;margin-bottom:16px;' + statusStyle + '">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">'
     +   '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'
@@ -1814,6 +1825,7 @@ window.renderDraftCard = function(d) {
     + '</div>'
     + '<div style="font-size:13px;color:#1D1D1B;line-height:1.7;margin-bottom:16px;white-space:pre-wrap;" id="content-' + d.id + '">' + contentHtml + '</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+    +   '<button onclick="openVisualPreview(\'' + d.id + '\')" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#0096D6,#005B9A);color:#fff;font-size:12px;font-weight:700;cursor:pointer;">&#9654; Preview</button>'
     +   '<button onclick="approveDraft(\'' + d.id + '\',this)" ' + approveDisabled + ' style="padding:8px 18px;border-radius:8px;border:none;background:rgba(52,168,83,.12);color:#1B5E20;font-size:12px;font-weight:700;cursor:pointer;">&#10003; Approve</button>'
     +   '<button onclick="rejectDraft(\'' + d.id + '\',this)" ' + rejectDisabled + ' style="padding:8px 18px;border-radius:8px;border:none;background:rgba(234,67,53,.1);color:#C62828;font-size:12px;font-weight:700;cursor:pointer;">&#10005; Reject</button>'
     +   '<button onclick="regenerateDraft(\'' + d.id + '\',this)" style="padding:8px 18px;border-radius:8px;border:none;background:rgba(30,39,97,.1);color:#1E2761;font-size:12px;font-weight:700;cursor:pointer;" id="regen-' + d.id + '">&#8635; Regenerate</button>'
@@ -1904,6 +1916,149 @@ window.submitSuggestion = function() {
     if (conf) { conf.textContent = '\u2713 Suggestion saved (draft generation failed: ' + err + ')'; }
   });
 };
+</script>
+
+
+<!-- Visual Draft Preview Modal -->
+<div id="vp-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;">
+  <div style="position:relative;width:360px;max-width:95vw;">
+    <button onclick="closeVisualPreview()" style="position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;opacity:.8;">&#10005; Close</button>
+    <div id="vp-screen" style="width:360px;height:640px;border-radius:18px;overflow:hidden;position:relative;background:#111;box-shadow:0 20px 60px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;">
+      <div id="vp-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;text-align:center;transition:opacity .35s ease;"></div>
+      <div id="vp-progress" style="position:absolute;bottom:0;left:0;height:3px;background:rgba(255,255,255,.6);width:0%;transition:width linear;"></div>
+      <div id="vp-badge" style="position:absolute;top:16px;left:16px;font-size:10px;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:20px;text-transform:uppercase;"></div>
+      <div id="vp-info" style="position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:10px;color:rgba(255,255,255,.5);padding:0 16px;"></div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:16px;">
+      <button onclick="vpReplay()" style="padding:8px 20px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">&#8635; Replay</button>
+      <button onclick="closeVisualPreview()" style="padding:8px 20px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:600;cursor:pointer;">Done</button>
+    </div>
+    <div id="vp-production" style="margin-top:16px;background:rgba(255,255,255,.08);border-radius:12px;padding:14px;max-width:360px;"></div>
+  </div>
+</div>
+
+<script>
+// ── Visual Preview Player ────────────────────────────────────────────────────
+var _vpData = null;
+var _vpTimer = null;
+
+window.openVisualPreview = function(draftId) {
+  var drafts = [];
+  try { drafts = JSON.parse(localStorage.getItem('mmg_drafts') || '[]'); } catch(e) {}
+  var draft = null;
+  for (var i = 0; i < drafts.length; i++) { if (drafts[i].id === draftId) { draft = drafts[i]; break; } }
+  if (!draft) return;
+
+  var data = null;
+  try {
+    var raw = draft.content.trim();
+    // Strip markdown code fences if present
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/,'');
+    data = JSON.parse(raw);
+  } catch(e) {
+    // Not JSON — wrap plain text as a simple tiktok
+    data = {
+      type: 'tiktok',
+      title: draft.suggestion.slice(0, 40),
+      palette: {bg: '#0096D6', accent: '#FF97A9', text: '#ffffff'},
+      scenes: draft.content.split('\n').filter(function(l){ return l.trim(); }).slice(0,6).map(function(l, i) {
+        return {duration: 3000, text: l.trim(), size: i === 0 ? 36 : 24, weight: i === 0 ? '900' : '600', align: 'center'};
+      }),
+      voiceover: draft.content,
+      music_mood: 'upbeat',
+      firefly_prompt: 'HP product lifestyle photo, vibrant, Gen-Z aesthetic'
+    };
+  }
+
+  // Handle array (tiktok + meme both)
+  if (Array.isArray(data)) data = data[0];
+
+  _vpData = data;
+  document.getElementById('vp-modal').style.display = 'flex';
+  vpPlay(data);
+};
+
+window.closeVisualPreview = function() {
+  if (_vpTimer) clearTimeout(_vpTimer);
+  document.getElementById('vp-modal').style.display = 'none';
+};
+
+window.vpReplay = function() {
+  if (_vpData) vpPlay(_vpData);
+};
+
+function vpPlay(data) {
+  if (_vpTimer) clearTimeout(_vpTimer);
+  var screen = document.getElementById('vp-screen');
+  var content = document.getElementById('vp-content');
+  var progress = document.getElementById('vp-progress');
+  var badge = document.getElementById('vp-badge');
+  var info = document.getElementById('vp-info');
+  var prod = document.getElementById('vp-production');
+
+  var pal = data.palette || {bg:'#0096D6', accent:'#ffffff', text:'#ffffff'};
+  screen.style.background = pal.bg;
+  badge.style.background = pal.accent;
+  badge.style.color = pal.bg;
+  badge.textContent = data.type === 'meme' ? 'Meme' : 'TikTok';
+
+  // Production notes
+  var notes = [];
+  if (data.voiceover) notes.push('<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Voiceover (ElevenLabs)</div><div style="font-size:11px;color:#fff;line-height:1.5;">' + data.voiceover + '</div></div>');
+  if (data.music_mood) notes.push('<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Music Mood</div><div style="font-size:11px;color:#fff;">' + data.music_mood + '</div></div>');
+  if (data.firefly_prompt) notes.push('<div><div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Firefly / Midjourney Prompt</div><div style="font-size:11px;color:#fff;line-height:1.5;">' + data.firefly_prompt + '</div></div>');
+  if (data.visual_description) notes.push('<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">Visual Description</div><div style="font-size:11px;color:#fff;line-height:1.5;">' + data.visual_description + '</div></div>');
+  prod.innerHTML = notes.join('');
+
+  if (data.type === 'meme') {
+    // Static meme layout
+    progress.style.width = '100%';
+    content.style.opacity = '1';
+    content.innerHTML = '<div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:20px;box-sizing:border-box;">'
+      + '<div style="font-size:28px;font-weight:900;color:' + pal.text + ';text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.5);line-height:1.2;">' + (data.top_text || '') + '</div>'
+      + '<div style="font-size:13px;color:rgba(255,255,255,.4);font-style:italic;text-align:center;">[Image: ' + (data.visual_description || 'HP product visual') + ']</div>'
+      + '<div style="font-size:28px;font-weight:900;color:' + pal.text + ';text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.5);line-height:1.2;">' + (data.bottom_text || '') + '</div>'
+      + '</div>';
+    info.textContent = data.title || '';
+    return;
+  }
+
+  // TikTok scene-by-scene animation
+  var scenes = data.scenes || [];
+  var totalDuration = scenes.reduce(function(s, sc) { return s + (sc.duration || 3000); }, 0);
+  var elapsed = 0;
+
+  function showScene(idx) {
+    if (idx >= scenes.length) {
+      info.textContent = 'Done — ' + (data.title || '');
+      content.style.opacity = '0.4';
+      return;
+    }
+    var sc = scenes[idx];
+    content.style.opacity = '0';
+    setTimeout(function() {
+      content.style.color = pal.text || '#ffffff';
+      content.style.fontSize = (sc.size || 28) + 'px';
+      content.style.fontWeight = sc.weight || '700';
+      content.style.textAlign = sc.align || 'center';
+      content.style.lineHeight = '1.25';
+      content.style.letterSpacing = sc.size > 40 ? '-1px' : '0';
+      content.innerHTML = sc.text || '';
+      content.style.opacity = '1';
+      info.textContent = 'Scene ' + (idx + 1) + ' of ' + scenes.length + (data.title ? ' · ' + data.title : '');
+      elapsed += sc.duration || 3000;
+      var pct = Math.round((elapsed / totalDuration) * 100);
+      progress.style.transition = 'width ' + ((sc.duration||3000)/1000) + 's linear';
+      progress.style.width = pct + '%';
+      _vpTimer = setTimeout(function() { showScene(idx + 1); }, sc.duration || 3000);
+    }, 150);
+  }
+
+  progress.style.transition = 'none';
+  progress.style.width = '0%';
+  elapsed = 0;
+  showScene(0);
+}
 </script>
 
 </body>
