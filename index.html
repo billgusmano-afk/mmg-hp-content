@@ -1504,6 +1504,10 @@ function showIT(tab, el) {
   if (tab === 'activity' && BOX_TOKEN) {
     loadBoxActivity();
   }
+  if (tab === 'suggest' || tab === 'drafts') {
+    if (typeof updateSugSubmitter === 'function') updateSugSubmitter();
+    if (tab === 'drafts' && typeof loadDrafts === 'function') loadDrafts();
+  }
 }
 
 window.showIT = showIT;
@@ -1518,7 +1522,8 @@ window.doLogin = doLogin;
 function swTab(t,el){document.querySelectorAll('.l-tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');document.getElementById('pi').style.display=t==='int'?'block':'none';document.getElementById('pc').style.display=t==='cli'?'block':'none';}
 function doLogin(){var raw=document.getElementById('ie').value.trim().toLowerCase();var em=raw.includes('@')?raw:raw.replace(/[^a-z]/g,'');var pw=document.getElementById('ip').value.trim();var err=document.getElementById('ei');if(pw!=='hp2025'||!USERS[em]){err.style.display='block';return;}err.style.display='none';curUser=USERS[em];document.getElementById('ls').style.display='none';document.getElementById('iv').style.display='block';var av=document.getElementById('iav');av.textContent=curUser.i;av.style.background=curUser.bg;av.style.color=curUser.fg;var sb=document.getElementById('sb-'+curUser.sb);if(sb)sb.classList.add('me');
   // Initialize Box connection - OAuth handles everything
-  setTimeout(function(){ initBoxConnection(); }, 400);if(curUser.canFlag){document.querySelectorAll('.xb-fl').forEach(function(b){b.classList.remove('xb-locked');b.setAttribute('onclick','event.stopPropagation();toggleFlagBox(this)');b.title='';});}else{document.querySelectorAll('.xb-fl[data-can="true"]').forEach(function(b){b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
+  setTimeout(function(){ initBoxConnection(); }, 400);
+  if (typeof updateSugSubmitter === 'function') updateSugSubmitter();if(curUser.canFlag){document.querySelectorAll('.xb-fl').forEach(function(b){b.classList.remove('xb-locked');b.setAttribute('onclick','event.stopPropagation();toggleFlagBox(this)');b.title='';});}else{document.querySelectorAll('.xb-fl[data-can="true"]').forEach(function(b){b.classList.add('xb-locked');b.removeAttribute('onclick');b.title='Only Bill, Jeff, Bryan, Deni, Rob can flag';});}}
 
 function toggleFlag(btn,id){
   if(btn.classList.contains('xb-locked'))return;
